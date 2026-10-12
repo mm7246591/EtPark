@@ -19,6 +19,7 @@ interface Restaurant extends BasePlace {
 }
 interface ParkingLot extends BasePlace {
   kind: 'parking';
+  drivingMinutes?: number | null;
   spaces: number | null;
   price: string;
 }
@@ -28,6 +29,7 @@ interface SearchSuggestion {
   description: string;
   address: string;
   distance: number | null;
+  drivingMinutes?: number | null;
   prediction: google.maps.places.PlacePrediction;
 }
 export type {

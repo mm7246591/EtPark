@@ -4,6 +4,7 @@ import { getCityParking } from '@/apis/nationalParking';
 import { loadMapsLibrary, mapsConfigured } from '@/apis/googleMaps';
 import { distanceInMeters } from '../utils/parking';
 import { cities } from '../constants/cities';
+import { useDrivingTimes } from './useDrivingTimes';
 import type {
   Coordinates,
   Place,
@@ -15,6 +16,7 @@ import type {
 
 export const useExplore = () => {
   const { blocked, handleApiError, dialogMessage } = useApiUsage();
+  const { getMinutes } = useDrivingTimes();
   const activeKind = shallowRef<PlaceKind>('food');
   const selected = shallowRef<Place | null>(null);
   const destination = shallowRef<Restaurant | null>(null);
@@ -82,6 +84,21 @@ export const useExplore = () => {
       parkingNotice.value = result.notice;
       if (!parkingLots.value.length && !result.notice)
         message.value = '此地點一公里內沒有資料來源收錄的停車場。';
+      if (origin.value && parkingLots.value.length) {
+        const lots = parkingLots.value;
+        const isCurrent = () =>
+          request === sequence && !disposed && !blocked.value;
+        const minutes = await getMinutes(
+          origin.value,
+          lots.map((lot) => lot.location),
+          isCurrent
+        );
+        if (isCurrent())
+          parkingLots.value = lots.map((lot, index) => ({
+            ...lot,
+            drivingMinutes: minutes[index] ?? null,
+          }));
+      }
     } catch (error) {
       if (!disposed) handleApiError(error);
       if (request === sequence) {
@@ -177,6 +194,21 @@ export const useExplore = () => {
         .sort((a, b) => (a.distance ?? Infinity) - (b.distance ?? Infinity));
       if (!suggestions.value.length)
         searchMessage.value = '查無地點，請輸入更完整的台灣店名或地址。';
+      if (origin.value && suggestions.value.length) {
+        const candidates = suggestions.value;
+        const isCurrent = () =>
+          request === sequence && !disposed && !blocked.value;
+        const minutes = await getMinutes(
+          origin.value,
+          candidates.map((item) => `places/${item.id}`),
+          isCurrent
+        );
+        if (isCurrent())
+          suggestions.value = candidates.map((item, index) => ({
+            ...item,
+            drivingMinutes: minutes[index] ?? null,
+          }));
+      }
     } catch (error) {
       if (!disposed) handleApiError(error);
       if (request === sequence) searchMessage.value = dialogMessage.value;

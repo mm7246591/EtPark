@@ -206,16 +206,10 @@ const moveTab = (event: KeyboardEvent) => {
             <span class="flex items-start justify-between gap-[8px]">
               <span class="text-primary font-[700]">{{ suggestion.name }}</span>
               <span
-                v-if="hasOrigin"
+                v-if="hasOrigin && suggestion.drivingMinutes != null"
                 class="text-forest shrink-0 text-[12px]"
               >
-                {{
-                  suggestion.distance === null
-                    ? '距離未提供'
-                    : suggestion.distance >= 1000
-                      ? `${(suggestion.distance / 1000).toFixed(1)} km`
-                      : `${Math.round(suggestion.distance)} m`
-                }}
+                約 {{ suggestion.drivingMinutes }} 分鐘
               </span>
             </span>
             <span
@@ -377,24 +371,34 @@ const moveTab = (event: KeyboardEvent) => {
             </span>
             <span
               v-if="place.kind === 'parking'"
-              class="shrink-0 rounded-[6px] px-[8px] py-[4px] text-[12px]/[16px] font-[700]"
-              :class="
-                place.spaces === null
-                  ? 'bg-primary text-secondary'
-                  : place.spaces === 0
-                    ? 'bg-full text-white'
-                    : place.spaces <= 5
-                      ? 'bg-few text-few-text'
-                      : 'bg-available text-forest'
-              "
+              class="flex shrink-0 flex-col items-end gap-[6px]"
             >
-              {{
-                place.spaces === null
-                  ? '車位未提供'
-                  : place.spaces === 0
-                    ? '已客滿'
-                    : `剩餘車位：${place.spaces}`
-              }}
+              <span
+                class="shrink-0 rounded-[6px] px-[8px] py-[4px] text-[12px]/[16px] font-[700]"
+                :class="
+                  place.spaces === null
+                    ? 'bg-primary text-secondary'
+                    : place.spaces === 0
+                      ? 'bg-full text-white'
+                      : place.spaces <= 5
+                        ? 'bg-few text-few-text'
+                        : 'bg-available text-forest'
+                "
+              >
+                {{
+                  place.spaces === null
+                    ? '車位未提供'
+                    : place.spaces === 0
+                      ? '已客滿'
+                      : `剩餘車位：${place.spaces}`
+                }}
+              </span>
+              <span
+                v-if="place.drivingMinutes != null"
+                class="text-forest text-[12px] font-[500]"
+              >
+                約 {{ place.drivingMinutes }} 分鐘
+              </span>
             </span>
           </span>
           <span
@@ -456,6 +460,7 @@ const moveTab = (event: KeyboardEvent) => {
 
 ## 主要行為
 
+- 搜尋候選店名右側與停車場剩餘車位下方，只顯示從目前位置出發的預估開車分鐘；缺少定位、查無路線或時間尚未取得時省略。
 - 點擊開始導航向父頁面回報 navigate，以開啟 Google Maps 開車導航。
 
 - 使用者直接輸入店名或地址，縣市由頁面流程自動判斷，不提供手動縣市選單。

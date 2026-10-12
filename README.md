@@ -9,6 +9,7 @@ Etpark 是結合地點搜尋與停車資訊的網站。使用者輸入店名或�
 - 查詢目的地所在縣市、距離一公里內的停車場。
 - 停車場依有車位、車位未知、已滿位分組，各組再依距離排序。
 - 顯示停車場地址、來源提供的收費資訊與剩餘車位。
+- 定位後顯示目前位置到候選店家及停車場的預估開車分鐘（不含即時路況）。
 - 點擊開始導航，開啟 Google Maps 導航至目的地或停車場。
 - 支援桌面及手機版面。
 
@@ -20,6 +21,7 @@ Etpark 是結合地點搜尋與停車資訊的網站。使用者輸入店名或�
 | 建置           | Vite                                          |
 | 樣式           | Tailwind CSS v3、SCSS                         |
 | 地圖與地點     | Google Maps JavaScript API、Places API（New） |
+| 行車時間       | Google Routes API（Route Matrix）             |
 | 停車資料處理   | Node.js、Netlify Functions、proj4             |
 | 回應格式檢查   | Zod Mini                                      |
 | 測試與品質檢查 | Vitest、ESLint、Prettier                      |
@@ -75,3 +77,5 @@ EtPark/
 專案使用 Netlify Hosting 與 Functions。連接 GitHub repository 後，由 `netlify.toml` 設定建置指令 `npm run build`、發布目錄 `dist` 及 Function 目錄 `netlify/functions`。
 
 正式環境需在 Netlify 設定相同的環境變數：`VITE_` 變數供建置使用，TDX 變數供 Functions 使用。前端與 Functions 必須一起部署；僅拖曳上傳 `dist` 不會部署停車 API。
+
+行車時間需啟用 Routes API 並加入 Google API 金鑰的 API 限制。Route Matrix 按起點與終點組合的元素數計算用量，需另外設定配額；既有 Maps／Places 配額不包含此服務。

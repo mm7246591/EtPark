@@ -12,7 +12,10 @@ vi.mock('vue', async (importOriginal) => ({
   ...(await importOriginal<typeof import('vue')>()),
   onBeforeUnmount: vi.fn(),
 }));
-beforeEach(() => vi.clearAllMocks());
+beforeEach(() => {
+  vi.clearAllMocks();
+  mocks.minutes.mockResolvedValue([]);
+});
 afterEach(() => {
   vi.useRealTimers();
   vi.unstubAllGlobals();
@@ -24,6 +27,7 @@ const mocks = vi.hoisted(() => ({
   fields: vi.fn(),
   parking: vi.fn(),
   quotaError: vi.fn(),
+  minutes: vi.fn(),
 }));
 vi.mock('../../../apis/googleMaps', () => ({
   mapsConfigured: true,
@@ -32,6 +36,7 @@ vi.mock('../../../apis/googleMaps', () => ({
     AutocompleteSessionToken: class {},
   }),
 }));
+vi.mock('../../../apis/routes', () => ({ getDrivingMinutes: mocks.minutes }));
 vi.mock('../../../apis/nationalParking', () => ({
   getCityParking: mocks.parking,
 }));
@@ -235,4 +240,91 @@ it('停車場有位優先、未知其次、滿位最後，各組由近到遠並�
     'unknown',
     'full',
   ]);
+});
+
+it('定位後以候選地點 ID 查行車時間，不查候選的詳細資料', async () => {
+  const explore = useExplore();
+  explore.origin.value = { lat: 25.03, lng: 121.56 };
+  mocks.search.mockResolvedValue({
+    suggestions: [
+      {
+        placePrediction: {
+          placeId: 'branch',
+          text: { toString: () => '分店' },
+          distanceMeters: 200,
+        },
+      },
+    ],
+  });
+  mocks.minutes.mockResolvedValue([4]);
+  await explore.search('分店');
+  expect(mocks.minutes).toHaveBeenCalledWith(explore.origin.value, [
+    'places/branch',
+  ]);
+  expect(explore.suggestions.value[0]?.drivingMinutes).toBe(4);
+  expect(mocks.fields).not.toHaveBeenCalled();
+});
+
+it('舊的行車時間回應不覆蓋清空後的搜尋結果', async () => {
+  const explore = useExplore();
+  explore.origin.value = { lat: 25.03, lng: 121.56 };
+  mocks.search.mockResolvedValue({
+    suggestions: [
+      {
+        placePrediction: {
+          placeId: 'old',
+          text: { toString: () => '舊店' },
+        },
+      },
+    ],
+  });
+  let resolve: (value: number[]) => void = () => {};
+  mocks.minutes.mockImplementationOnce(
+    () =>
+      new Promise((done) => {
+        resolve = done;
+      })
+  );
+  const pending = explore.search('舊店');
+  await vi.waitFor(() => expect(mocks.minutes).toHaveBeenCalledTimes(1));
+  explore.inputSearch('');
+  resolve([5]);
+  await pending;
+  expect(explore.suggestions.value).toEqual([]);
+});
+
+it('停車時間從目前位置計算，失敗仍保留已取得的車位資訊', async () => {
+  const explore = useExplore();
+  explore.origin.value = { lat: 25.03, lng: 121.56 };
+  const location = { lat: 25.04, lng: 121.56 };
+  const lotLocation = { lat: 25.0401, lng: 121.56 };
+  mocks.parking.mockResolvedValue({
+    lots: [{ id: 'parking', spaces: 10, location: lotLocation }],
+    source: '市府',
+    notice: '',
+  });
+  mocks.minutes.mockResolvedValueOnce([3]);
+  const suggestion = {
+    name: '店家',
+    prediction: {
+      toPlace: () => ({
+        id: 'store',
+        fetchFields: mocks.fields,
+        formattedAddress: '台北市',
+        location: { toJSON: () => location },
+      }),
+    },
+  };
+  await explore.chooseSuggestion(suggestion as never);
+  expect(mocks.minutes).toHaveBeenCalledWith(explore.origin.value, [
+    lotLocation,
+  ]);
+  expect(explore.parkingLots.value[0]?.drivingMinutes).toBe(3);
+  explore.origin.value = { lat: 25.02, lng: 121.56 };
+  const error = new Error('network failed');
+  mocks.minutes.mockRejectedValueOnce(error);
+  await explore.chooseSuggestion(suggestion as never);
+  expect(explore.source.value).toBe('市府');
+  expect(explore.parkingLots.value[0]?.spaces).toBe(10);
+  expect(mocks.quotaError).toHaveBeenCalledWith(error);
 });
