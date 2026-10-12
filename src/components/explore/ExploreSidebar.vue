@@ -111,8 +111,8 @@ watch(
       <header
         class="bg-brand-primary text-inverse shrink-0 px-[16px] py-[10px] md:px-[20px] md:py-[20px]"
       >
-        <h1 class="text-[22px] font-[700]">EtPark</h1>
-        <p class="mt-[4px] text-[13px]">找到目的地，也找到停車位</p>
+        <h1 class="text-[24px] font-[700]">EtPark</h1>
+        <p class="mt-[4px] text-[14px]">找到目的地，也找到停車位</p>
       </header>
       <div
         class="line-primary shrink-0 border-b-[1px] px-[16px] py-[10px] md:px-[20px] md:py-[12px]"
@@ -185,7 +185,7 @@ watch(
               :key="suggestion.id"
               :value="suggestion.id"
               :disabled="blocked || loading"
-              class="line-primary block w-[100%] cursor-pointer rounded-[6px] border-b-[1px] px-[8px] py-[10px] text-left text-[13px] outline-none hover:bg-[color:var(--background-primary)] data-[highlighted]:bg-[color:var(--background-available)]"
+              class="line-primary block w-[100%] cursor-pointer rounded-[6px] border-b-[1px] px-[8px] py-[10px] text-left text-[14px] outline-none hover:bg-[color:var(--background-primary)] data-[highlighted]:bg-[color:var(--background-available)]"
               @select="choose(suggestion)"
             >
               <span class="text-primary font-[700]">{{ suggestion.name }}</span>
@@ -397,14 +397,14 @@ watch(
                 </span>
               </span>
               <span
-                class="text-secondary mt-[8px] block text-[13px] leading-[24px]"
+                class="text-secondary mt-[8px] block text-[14px] leading-[24px]"
               >
                 <template v-if="place.kind === 'food'">
                   {{ place.address }}
                   <span
                     v-for="credit in place.attributions"
                     :key="credit.provider"
-                    class="mt-[4px] block text-[11px]"
+                    class="mt-[4px] block text-[12px]"
                   >
                     資料提供：{{ credit.provider }}
                   </span>
@@ -500,5 +500,6 @@ watch(
 - 手機版整個清單欄可捲動，操作區不固定占用結果高度；桌面保留清單獨立捲動。
 - 處理載入、未設定 key、空清單及 nullable 選取狀態，不直接呼叫 API。
 - 尺寸與效果使用 tag 上明確數值 Tailwind class；顏色使用 variables.scss 的普通 class，色值集中 theme-color.scss。
+- 文字最低 12px，依 Tailwind v3 字級採用 12、14、16、18、20、24px 等級距，保留明確 px 寫法。
 - 全域必要樣式位於 main.scss；頁面專屬型別位於 views/explore/types。
 </spec>

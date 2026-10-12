@@ -48,7 +48,7 @@ const { markers, mapError, ready } = useExploreMap(
       <h2 class="text-[18px] font-[700]">{{ mapError || '地圖載入中…' }}</h2>
       <p
         v-if="!blocked"
-        class="text-secondary max-w-[360px] text-[13px] leading-[22px]"
+        class="text-secondary max-w-[360px] text-[14px] leading-[22px]"
       >
         設定完成後會顯示真實 Google 地圖與停車場標記。請先設定
         key，再搜尋實際店名或地址。
@@ -57,7 +57,7 @@ const { markers, mapError, ready } = useExploreMap(
     <p
       v-if="selected"
       role="status"
-      class="bg-card pointer-events-none absolute left-[16px] top-[16px] flex max-w-[80%] items-center gap-[6px] rounded-[8px] px-[12px] py-[8px] text-[13px] shadow-[0_1px_2px_0_var(--shadow-soft)]"
+      class="bg-card pointer-events-none absolute left-[16px] top-[16px] flex max-w-[80%] items-center gap-[6px] rounded-[8px] px-[12px] py-[8px] text-[14px] shadow-[0_1px_2px_0_var(--shadow-soft)]"
     >
       <span
         aria-hidden="true"
