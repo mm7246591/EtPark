@@ -239,18 +239,6 @@ export const useExplore = () => {
   const switchKind = (kind: PlaceKind) => {
     activeKind.value = kind;
   };
-  const navigate = (place: Place) => {
-    const params = new URLSearchParams({
-      api: '1',
-      destination: `${place.location.lat},${place.location.lng}`,
-      travelmode: 'driving',
-    });
-    window.open(
-      `https://www.google.com/maps/dir/?${params}`,
-      '_blank',
-      'noopener,noreferrer'
-    );
-  };
   const locate = () => {
     if (loading.value || blocked.value) return;
     if (!navigator.geolocation) {
@@ -313,7 +301,6 @@ export const useExplore = () => {
     chooseSuggestion,
     select,
     switchKind,
-    navigate,
     locate,
     refresh,
   };

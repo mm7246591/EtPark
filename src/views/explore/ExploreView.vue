@@ -1,6 +1,8 @@
 <script setup lang="ts">
+import ExploreRoutePanel from '@/components/explore/ExploreRoutePanel.vue';
 import ApiUsageDialog from '@/components/explore/ApiUsageDialog.vue';
 import { useApiUsage } from '@/composables/useApiUsage';
+import { useExploreRoutes } from './composables/useExploreRoutes';
 import ExploreSidebar from '../../components/explore/ExploreSidebar.vue';
 import ExploreMap from '../../components/explore/ExploreMap.vue';
 import { useExplore } from './composables/useExplore';
@@ -27,9 +29,20 @@ const {
   places,
   select,
   switchKind,
-  navigate,
+  destination,
   locate,
 } = useExplore();
+const { preview, routeLoading, routeOpen, routeNotice, navigate, closeRoute } =
+  useExploreRoutes(destination);
+const selectPlace = (place: Parameters<typeof select>[0]) => {
+  closeRoute();
+  select(place);
+};
+const navigateTo = (place: Parameters<typeof navigate>[0]) => {
+  closeRoute();
+  select(place);
+  navigate(place);
+};
 </script>
 
 <template>
@@ -57,17 +70,28 @@ const {
       @search="search"
       @choose-suggestion="chooseSuggestion"
       @refresh="refresh"
-      @select="select"
+      @select="selectPlace"
       @switch-kind="switchKind"
-      @navigate="navigate"
+      @navigate="navigateTo"
       @locate="locate"
-    />
+    >
+      <template #route>
+        <ExploreRoutePanel
+          v-if="routeOpen"
+          :preview="preview"
+          :loading="routeLoading"
+          :notice="routeNotice"
+          @close="closeRoute"
+        />
+      </template>
+    </ExploreSidebar>
     <ExploreMap
       :restaurants="restaurants"
       :parking-lots="parkingLots"
       :selected="selected"
+      :route-preview="preview"
       :blocked="blocked"
-      @select="select"
+      @select="selectPlace"
     />
     <ApiUsageDialog
       :open="dialogOpen"
@@ -112,6 +136,6 @@ const {
 - 網路、逾時與其他服務異常依原因顯示 dialog，恢復後可重試；不在網站預先檢查或計數 API 用量。
 - Google 配額錯誤顯示「今日免費查詢額度已達上限，請明日再試！」；錯誤可能來自每分鐘或每日上限，並不代表費用報表的免費額度已用完。
 - 處理 loading、空結果與 API 失敗；Google key 由 .env.local 提供，缺少時顯示設定提示。
-- 裝置定位不需要 Google key；導航另開 Google Maps 網頁。
+- 裝置定位不需要 Google key；路線預覽使用 Routes API 基本開車路線，一次點擊最多一筆路線查詢，不取即時交通；需啟用 Routes API 與 key 權限。
 - 頁面專屬 composables、constants、types 位於 `views/explore`；子元件位於 `src/components/explore`。
 </spec>

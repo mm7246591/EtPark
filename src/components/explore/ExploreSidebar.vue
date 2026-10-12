@@ -314,6 +314,7 @@ const moveTab = (event: KeyboardEvent) => {
       tabindex="0"
       class="bg-primary flex-1 shrink-0 p-[16px] md:min-h-[0px] md:overflow-y-auto"
     >
+      <slot name="route"></slot>
       <p
         v-if="noticeMessage"
         role="status"
@@ -431,7 +432,7 @@ const moveTab = (event: KeyboardEvent) => {
             >
               navigation
             </span>
-            <span>導航</span>
+            <span>開車路線</span>
           </button>
         </div>
       </article>
@@ -455,6 +456,8 @@ const moveTab = (event: KeyboardEvent) => {
 - 主要依賴：views/explore/types/place、Vue、Tailwind CSS v3。
 
 ## 主要行為
+
+- route slot 由父頁面提供路線摘要；點擊開車路線向父頁面回報 navigate。
 
 - 使用者直接輸入店名或地址，縣市由頁面流程自動判斷，不提供手動縣市選單。
 - 中文組字完成後發出 inputSearch，由頁面延遲 400ms 查建議；點擊搜尋按鈕可立即搜尋；搜尋框 Enter 僅確認組字，不搜尋或選店。
