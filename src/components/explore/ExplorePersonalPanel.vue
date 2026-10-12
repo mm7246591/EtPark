@@ -107,7 +107,10 @@ const tab = shallowRef('');
             <button
               class="min-w-[0px] flex-1 text-left disabled:opacity-[0.5]"
               :disabled="disabled"
-              @click="emit('open', item)"
+              @click="
+                tab = '';
+                emit('open', item);
+              "
             >
               <span class="block break-words text-[14px] font-[700]">
                 {{ item.name }}
@@ -177,6 +180,7 @@ const tab = shallowRef('');
 ## 主要行為
 
 - 由父頁面處理重開地點、刪除收藏與停車記錄編輯；不顯示過去保存的車位數。
+- 點選收藏或最近搜尋項目後自動收起，避免手機版結果被推出首屏。
 
 ## 狀態與限制
 
