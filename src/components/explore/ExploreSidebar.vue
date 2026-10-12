@@ -8,7 +8,6 @@ import type {
 
 const props = defineProps<{
   searching: boolean;
-  hasOrigin: boolean;
   searchMessage: string;
   noticeMessage: string;
   source: string;
@@ -205,12 +204,6 @@ const moveTab = (event: KeyboardEvent) => {
           >
             <span class="flex items-start justify-between gap-[8px]">
               <span class="text-primary font-[700]">{{ suggestion.name }}</span>
-              <span
-                v-if="hasOrigin && suggestion.drivingMinutes != null"
-                class="text-forest shrink-0 text-[12px]"
-              >
-                約 {{ suggestion.drivingMinutes }} 分鐘
-              </span>
             </span>
             <span
               class="text-secondary mt-[4px] block text-[12px] leading-[20px]"
@@ -453,14 +446,15 @@ const moveTab = (event: KeyboardEvent) => {
 
 ## 公開介面
 
-- Props：searching、hasOrigin、searchMessage、noticeMessage、source、parkingNotice、activeKind、selected（可為 null）、places、foodCount、parkingCount、suggestions、loading、blocked、blockedMessage、mapsConfigured。
+- Props：searching、searchMessage、noticeMessage、source、parkingNotice、activeKind、selected（可為 null）、places、foodCount、parkingCount、suggestions、loading、blocked、blockedMessage、mapsConfigured。
 - v-model：無公開 v-model，query 為內部輸入狀態。
 - Emits：inputSearch、search、chooseSuggestion、refresh、select、switchKind、navigate、locate。
 - 主要依賴：views/explore/types/place、Vue、Tailwind CSS v3。
 
 ## 主要行為
 
-- 搜尋候選店名右側與停車場剩餘車位下方，只顯示從目前位置出發的預估開車分鐘；缺少定位、查無路線或時間尚未取得時省略。
+- 搜尋候選只顯示店名與地址，不顯示距離或時間，也不查詢候選的行車時間。
+- 停車場剩餘車位下方顯示從目前位置出發的預估開車分鐘；缺少定位、查無路線或時間尚未取得時省略。
 - 點擊開始導航向父頁面回報 navigate，以開啟 Google Maps 開車導航。
 
 - 使用者直接輸入店名或地址，縣市由頁面流程自動判斷，不提供手動縣市選單。

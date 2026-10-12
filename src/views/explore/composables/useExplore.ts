@@ -194,21 +194,6 @@ export const useExplore = () => {
         .sort((a, b) => (a.distance ?? Infinity) - (b.distance ?? Infinity));
       if (!suggestions.value.length)
         searchMessage.value = '查無地點，請輸入更完整的台灣店名或地址。';
-      if (origin.value && suggestions.value.length) {
-        const candidates = suggestions.value;
-        const isCurrent = () =>
-          request === sequence && !disposed && !blocked.value;
-        const minutes = await getMinutes(
-          origin.value,
-          candidates.map((item) => `places/${item.id}`),
-          isCurrent
-        );
-        if (isCurrent())
-          suggestions.value = candidates.map((item, index) => ({
-            ...item,
-            drivingMinutes: minutes[index] ?? null,
-          }));
-      }
     } catch (error) {
       if (!disposed) handleApiError(error);
       if (request === sequence) searchMessage.value = dialogMessage.value;

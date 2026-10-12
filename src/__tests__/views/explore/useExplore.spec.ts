@@ -242,7 +242,7 @@ it('停車場有位優先、未知其次、滿位最後，各組由近到遠並�
   ]);
 });
 
-it('定位後以候選地點 ID 查行車時間，不查候選的詳細資料', async () => {
+it('定位後搜尋候選只取得店名地址，不查行車時間或詳細資料', async () => {
   const explore = useExplore();
   explore.origin.value = { lat: 25.03, lng: 121.56 };
   mocks.search.mockResolvedValue({
@@ -256,41 +256,10 @@ it('定位後以候選地點 ID 查行車時間，不查候選的詳細資料', 
       },
     ],
   });
-  mocks.minutes.mockResolvedValue([4]);
   await explore.search('分店');
-  expect(mocks.minutes).toHaveBeenCalledWith(explore.origin.value, [
-    'places/branch',
-  ]);
-  expect(explore.suggestions.value[0]?.drivingMinutes).toBe(4);
+  expect(mocks.minutes).not.toHaveBeenCalled();
+  expect(explore.suggestions.value[0]?.name).toBe('分店');
   expect(mocks.fields).not.toHaveBeenCalled();
-});
-
-it('舊的行車時間回應不覆蓋清空後的搜尋結果', async () => {
-  const explore = useExplore();
-  explore.origin.value = { lat: 25.03, lng: 121.56 };
-  mocks.search.mockResolvedValue({
-    suggestions: [
-      {
-        placePrediction: {
-          placeId: 'old',
-          text: { toString: () => '舊店' },
-        },
-      },
-    ],
-  });
-  let resolve: (value: number[]) => void = () => {};
-  mocks.minutes.mockImplementationOnce(
-    () =>
-      new Promise((done) => {
-        resolve = done;
-      })
-  );
-  const pending = explore.search('舊店');
-  await vi.waitFor(() => expect(mocks.minutes).toHaveBeenCalledTimes(1));
-  explore.inputSearch('');
-  resolve([5]);
-  await pending;
-  expect(explore.suggestions.value).toEqual([]);
 });
 
 it('停車時間從目前位置計算，失敗仍保留已取得的車位資訊', async () => {

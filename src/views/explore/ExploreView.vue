@@ -9,7 +9,6 @@ import { useExplore } from './composables/useExplore';
 const { blocked, dialogOpen, dialogMessage } = useApiUsage();
 const {
   searching,
-  origin,
   searchMessage,
   inputSearch,
   source,
@@ -46,7 +45,6 @@ const navigateTo = (place: Parameters<typeof select>[0]) => {
   >
     <ExploreSidebar
       :searching="searching"
-      :has-origin="Boolean(origin)"
       :search-message="searchMessage"
       :notice-message="message === dialogMessage ? '' : message"
       :source="source"
@@ -121,6 +119,6 @@ const navigateTo = (place: Parameters<typeof select>[0]) => {
 - Google 配額錯誤顯示「今日免費查詢額度已達上限，請明日再試！」；錯誤可能來自每分鐘或每日上限，並不代表費用報表的免費額度已用完。
 - 處理 loading、空結果與 API 失敗；Google key 由 .env.local 提供，缺少時顯示設定提示。
 - 點擊開始導航，以目的地座標開啟 Google Maps 開車導航；導航起點與定位由 Google Maps 處理。
-- 候選店家與停車場的行車時間使用 Routes API Route Matrix，只查基本開車時間，不含即時路況；每個終點計算一個用量元素，同一起終點暫存 5 分鐘，未定位不查詢。
+- 停車場的行車時間使用 Routes API Route Matrix，只查基本開車時間，不含即時路況；每個終點計算一個用量元素，同一起終點暫存 5 分鐘，未定位不查詢。
 - 頁面專屬 composables、constants、types 位於 `views/explore`；子元件位於 `src/components/explore`。
 </spec>

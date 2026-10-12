@@ -5,7 +5,6 @@ import ExploreSidebar from '../../../components/explore/ExploreSidebar.vue';
 
 const props = {
   searching: false,
-  hasOrigin: true,
   searchMessage: '',
   noticeMessage: '',
   source: '市府',
@@ -19,7 +18,6 @@ const props = {
       description: '店家地址',
       address: '台北市',
       distance: 1234,
-      drivingMinutes: 4,
       prediction: {} as never,
     },
   ],
@@ -44,9 +42,11 @@ const props = {
   parkingCount: 1,
 };
 
-it('搜尋候選改顯示分鐘，停車場車位下方顯示分鐘且保留開始導航', async () => {
+it('搜尋候選只呈現店名地址，停車場保留分鐘與開始導航', async () => {
   const html = await renderToString(createSSRApp(ExploreSidebar, props));
-  expect(html).toContain('約 4 分鐘');
+  expect(html).toContain('店家');
+  expect(html).toContain('台北市');
+  expect(html.slice(0, html.indexOf('</ul>'))).not.toMatch(/約 \d+ 分鐘/);
   expect(html).not.toContain('1.2 km');
   expect(html.indexOf('剩餘車位：12')).toBeLessThan(html.indexOf('約 7 分鐘'));
   expect(html).toContain('開始導航');
@@ -57,7 +57,6 @@ it('未定位或沒有時間時不顯示時間與未提供提示', async () => {
   const html = await renderToString(
     createSSRApp(ExploreSidebar, {
       ...props,
-      hasOrigin: false,
       places: props.places.map((place) => ({ ...place, drivingMinutes: null })),
     })
   );
