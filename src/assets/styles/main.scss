@@ -16,6 +16,12 @@ button:focus-visible {
   outline-offset: 4px;
 }
 
+input:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--line-focus);
+  outline-offset: 2px;
+}
+
 // 圖示字型共用設定，尺寸與色彩由各 template 指定。
 .material-symbols-rounded {
   font-family: 'Material Symbols Rounded';
