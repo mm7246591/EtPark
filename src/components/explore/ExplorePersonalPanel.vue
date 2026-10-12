@@ -87,15 +87,12 @@ const tab = shallowRef('');
             </button>
           </div>
         </template>
-        <p
-          v-else
-          class="text-secondary text-[12px]"
-        >
-          停好車後，點停車場卡片的「記錄車位」。
-        </p>
       </template>
       <template v-else>
-        <ul class="space-y-[8px]">
+        <ul
+          v-if="(tab === 'favorites' ? favorites : recent).length"
+          class="space-y-[8px]"
+        >
           <li
             v-for="item in tab === 'favorites' ? favorites : recent"
             :key="`${item.kind}-${item.id}`"
@@ -128,16 +125,6 @@ const tab = shallowRef('');
             </button>
           </li>
         </ul>
-        <p
-          v-if="!(tab === 'favorites' ? favorites : recent).length"
-          class="text-secondary text-[12px]"
-        >
-          {{
-            tab === 'favorites'
-              ? '還沒有收藏，點停車場卡片上的收藏即可加入。'
-              : '選擇店家後，會出現在最近搜尋。'
-          }}
-        </p>
         <button
           v-if="tab === 'recent' && recent.length"
           class="text-secondary mt-[8px] py-[6px] text-[12px]"
@@ -146,7 +133,7 @@ const tab = shallowRef('');
           清除最近搜尋
         </button>
       </template>
-      <p class="text-secondary mt-[8px] text-[12px]">
+      <p class="text-secondary mt-[8px] text-[12px] first:mt-[0px]">
         收藏與最近搜尋保留 30 天；停車記錄保留至清除。
       </p>
     </CollapsibleContent>
