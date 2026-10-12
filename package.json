@@ -12,7 +12,8 @@
     "format": "prettier --write \"src/**/*.{ts,js,vue,scss,css}\"",
     "format:check": "prettier --check \"src/**/*.{ts,js,vue,scss,css}\"",
     "test": "vitest run",
-    "type-check": "vue-tsc -b"
+    "type-check": "vue-tsc -b",
+    "api": "node --env-file-if-exists=.env.local server/parking.mjs"
   },
   "dependencies": {
     "@googlemaps/js-api-loader": "^2.1.3",
