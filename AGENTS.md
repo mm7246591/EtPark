@@ -1,4 +1,4 @@
-# Etpark Web Agent Rules
+# EtPark Web Agent Rules
 
 本檔案適用於整個專案。修改程式前，先確認現有資料流、API contract、路由、共用呼叫者與測試；不要只依需求文字猜測實作位置。
 

@@ -44,6 +44,7 @@ const props = {
 
 it('搜尋候選只呈現店名地址，停車場保留分鐘與開始導航', async () => {
   const html = await renderToString(createSSRApp(ExploreSidebar, props));
+  expect(html).toContain('EtPark</h1>');
   expect(html).toContain('店家');
   expect(html).toContain('台北市');
   expect(html.slice(0, html.indexOf('</ul>'))).not.toMatch(/約 \d+ 分鐘/);

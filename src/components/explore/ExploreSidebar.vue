@@ -117,7 +117,7 @@ const moveTab = (event: KeyboardEvent) => {
     <header
       class="bg-brand-primary text-inverse shrink-0 px-[16px] py-[10px] md:px-[20px] md:py-[20px]"
     >
-      <h1 class="text-[22px] font-[700]">Etpark</h1>
+      <h1 class="text-[22px] font-[700]">EtPark</h1>
       <p class="mt-[4px] text-[13px]">找到目的地，也找到停車位</p>
     </header>
     <div
