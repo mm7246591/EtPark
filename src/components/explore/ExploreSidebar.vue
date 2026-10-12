@@ -9,11 +9,13 @@ import {
   TabsList,
   TabsTrigger,
   TabsContent,
+  Toggle,
 } from 'reka-ui';
 import type {
   Place,
   PlaceKind,
   SearchSuggestion,
+  ParkingLot,
 } from '../../views/explore/types/place';
 
 const props = defineProps<{
@@ -32,6 +34,7 @@ const props = defineProps<{
   places: Place[];
   foodCount: number;
   parkingCount: number;
+  favoriteKeys?: string[];
   radius?: number;
   expanding?: boolean;
 }>();
@@ -44,6 +47,8 @@ const emit = defineEmits<{
   switchKind: [kind: PlaceKind];
   navigate: [place: Place];
   locate: [];
+  favorite: [place: ParkingLot];
+  recordParking: [place: ParkingLot];
 }>();
 const query = shallowRef('');
 const composing = shallowRef(false);
@@ -220,6 +225,7 @@ watch(
             <span>更新車位</span>
           </button>
         </div>
+        <slot name="personal"></slot>
       </div>
       <TabsList
         class="line-primary flex shrink-0 border-b-[1px]"
@@ -413,6 +419,28 @@ watch(
               </span>
             </button>
             <div class="mt-[12px] flex flex-wrap justify-end gap-[8px]">
+              <Toggle
+                v-if="place.kind === 'parking'"
+                :model-value="
+                  favoriteKeys?.includes(`${place.kind}-${place.id}`) ?? false
+                "
+                :aria-label="`${favoriteKeys?.includes(`${place.kind}-${place.id}`) ? '取消收藏' : '收藏'}${place.name}`"
+                class="bg-primary text-forest rounded-[6px] px-[10px] py-[8px] text-[12px]"
+                @update:model-value="emit('favorite', place)"
+              >
+                {{
+                  favoriteKeys?.includes(`${place.kind}-${place.id}`)
+                    ? '已收藏'
+                    : '收藏'
+                }}
+              </Toggle>
+              <button
+                v-if="place.kind === 'parking'"
+                class="bg-primary text-forest rounded-[6px] px-[10px] py-[8px] text-[12px]"
+                @click="emit('recordParking', place)"
+              >
+                記錄車位
+              </button>
               <button
                 class="bg-primary inline-flex items-center gap-[6px] rounded-[6px] px-[12px] py-[8px] text-[12px]/[16px] font-[500] hover:bg-[color:var(--brand-secondary)]"
                 :aria-label="`導航前往${place.name}`"
@@ -444,10 +472,10 @@ watch(
 
 ## 公開介面
 
-- Props：searching、searchMessage、noticeMessage、source、parkingNotice、activeKind、selected（可為 null）、places、foodCount、parkingCount、suggestions、loading、blocked、blockedMessage、mapsConfigured、radius、expanding。
+- Props：searching、searchMessage、noticeMessage、source、parkingNotice、activeKind、selected（可為 null）、places、foodCount、parkingCount、suggestions、loading、blocked、blockedMessage、mapsConfigured、favoriteKeys、radius、expanding。
 - v-model：無公開 v-model，query 為內部輸入狀態。
-- Emits：inputSearch、search、chooseSuggestion、refresh、select、switchKind、navigate、locate。
-- 主要依賴：views/explore/types/place、Vue、Reka UI Combobox／Tabs、Tailwind CSS v3。
+- Emits：inputSearch、search、chooseSuggestion、refresh、select、switchKind、navigate、locate、favorite、recordParking。
+- 主要依賴：views/explore/types/place、Vue、Reka UI Combobox／Tabs／Toggle、Tailwind CSS v3。
 
 ## 主要行為
 
@@ -455,13 +483,13 @@ watch(
 - 停車場剩餘車位下方顯示從目前位置出發的預估開車分鐘；缺少定位、查無路線或時間尚未取得時省略。
 - 點擊開始導航向父頁面回報 navigate，以開啟 Google Maps 開車導航。
 - 自動擴大時以 radar 圖示及「正在調整搜尋範圍…」顯示狀態，完成後顯示目前範圍；期間停用搜尋避免重複請求。
-- parking-controls slot 由父頁面提供排序介面。
+- personal 與 parking-controls slot 由父頁面提供紀錄與篩選介面；卡片回報收藏、取消收藏與記錄車位事件。
 
 - 使用者直接輸入店名或地址，縣市由頁面流程自動判斷，不提供手動縣市選單。
 - 中文組字完成後發出 inputSearch，由頁面延遲 400ms 查建議；點擊搜尋按鈕可立即搜尋；搜尋框 Enter 僅確認組字，不搜尋或選店。
 - 建議只呈現名稱與地址；方向鍵移動候選高亮，點擊店家選取，Escape 關閉。
 - 搜尋時由頁面自動取得定位；拒絕定位仍能搜尋，選擇建議時發出 chooseSuggestion。
-- 顯示地址、臨停收費說明、距離（X m）與車位；已滿位不列入清單。
+- 顯示地址、臨停收費說明、距離（X m）與車位；收藏僅供停車場，已滿位不列入清單。
 - 分頁支援方向鍵、Home 與 End；清單使用穩定 id。
 - 定位、導航與更新操作由父元件處理。
 

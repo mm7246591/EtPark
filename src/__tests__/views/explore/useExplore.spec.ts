@@ -33,7 +33,20 @@ vi.mock('../../../apis/googleMaps', () => ({
   mapsConfigured: true,
   loadMapsLibrary: async () => ({
     AutocompleteSuggestion: { fetchAutocompleteSuggestions: mocks.search },
-    AutocompleteSessionToken: class {},
+    AutocompleteSessionToken: vi.fn(),
+    Place: class {
+      id: string;
+
+      location = { toJSON: () => ({ lat: 25.03, lng: 121.56 }) };
+
+      formattedAddress = '台北市最新地址';
+
+      fetchFields = mocks.fields;
+
+      constructor({ id }: { id: string }) {
+        this.id = id;
+      }
+    },
   }),
 }));
 vi.mock('../../../apis/routes', () => ({ getDrivingMinutes: mocks.minutes }));
@@ -326,6 +339,48 @@ it('一公里有確定空位時不擴大，排序不再查 API', async () => {
   expect(explore.parkingLots.value.map((lot) => lot.id)).toEqual(['near']);
   expect(mocks.parking).toHaveBeenCalledTimes(1);
   expect(mocks.minutes).not.toHaveBeenCalled();
+});
+
+it('重開收藏停車場取得新車位，不把收藏資料當成即時狀態', async () => {
+  const explore = useExplore();
+  mocks.parking.mockResolvedValue({
+    lots: [{ id: 'saved', spaces: 5, location: { lat: 25, lng: 121 } }],
+    source: '市府',
+    notice: '',
+  });
+  await explore.openSaved({
+    id: 'saved',
+    kind: 'parking',
+    name: '停車場',
+    address: '台北市',
+    location: { lat: 25, lng: 121 },
+    savedAt: Date.now(),
+  });
+  expect(mocks.parking).toHaveBeenCalledTimes(1);
+  expect(explore.parkingLots.value[0]?.spaces).toBe(5);
+  expect(explore.selected.value?.id).toBe('saved');
+});
+
+it('重新開啟收藏店家使用 place ID 取得最新地址再查車位', async () => {
+  const explore = useExplore();
+  mocks.fields.mockResolvedValue({});
+  mocks.parking.mockResolvedValue({ lots: [], source: '市府', notice: '' });
+  await explore.openSaved({
+    id: 'store',
+    kind: 'food',
+    name: '收藏店家',
+    address: '舊地址',
+    location: { lat: 20, lng: 120 },
+    savedAt: Date.now(),
+  });
+  expect(mocks.fields).toHaveBeenCalledWith({
+    fields: ['location', 'formattedAddress', 'attributions'],
+  });
+  expect(explore.destination.value?.address).toBe('台北市最新地址');
+  expect(mocks.parking).toHaveBeenCalledWith('Taipei', {
+    lat: 25.03,
+    lng: 121.56,
+  });
 });
 
 it('自動擴大完成後只查一次最終清單時間，排序不重查時間', async () => {

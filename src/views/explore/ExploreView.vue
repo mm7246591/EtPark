@@ -1,7 +1,13 @@
 <script setup lang="ts">
+import { shallowRef, watch } from 'vue';
+import ExplorePersonalPanel from '@/components/explore/ExplorePersonalPanel.vue';
 import ParkingControls from '@/components/explore/ParkingControls.vue';
+import ParkingRecordDialog from '@/components/explore/ParkingRecordDialog.vue';
 import ApiUsageDialog from '@/components/explore/ApiUsageDialog.vue';
 import { useApiUsage } from '@/composables/useApiUsage';
+import { usePersonalPlaces } from './composables/usePersonalPlaces';
+import type { SavedPlace } from './types/personal';
+import type { ParkingLot } from './types/place';
 import { getGoogleMapsNavigationUrl } from './utils/navigation';
 import ExploreSidebar from '../../components/explore/ExploreSidebar.vue';
 import ExploreMap from '../../components/explore/ExploreMap.vue';
@@ -13,6 +19,8 @@ const {
   expanding,
   parkingTotal,
   parkingSort,
+  openSaved,
+  destination,
   searching,
   searchMessage,
   inputSearch,
@@ -34,6 +42,43 @@ const {
   switchKind,
   locate,
 } = useExplore();
+const {
+  favorites,
+  recent,
+  parked,
+  storageMessage,
+  toggleFavorite,
+  removeFavorite,
+  addRecent,
+  clearRecent,
+  saveParking,
+  clearParking,
+} = usePersonalPlaces();
+watch(destination, (place) => {
+  if (place && !place.id.startsWith('saved-parking:')) addRecent(place);
+});
+const recordPlace = shallowRef<SavedPlace | null>(null);
+const recordNote = shallowRef('');
+const recordParking = (place: ParkingLot) => {
+  recordNote.value = '';
+  recordPlace.value = {
+    id: place.id,
+    kind: place.kind,
+    name: place.name,
+    address: place.address,
+    location: place.location,
+    savedAt: Date.now(),
+  };
+};
+const editParking = () => {
+  if (!parked.value) return;
+  recordNote.value = parked.value.note;
+  recordPlace.value = parked.value.place;
+};
+const saveRecord = (note: string) => {
+  if (recordPlace.value) saveParking(recordPlace.value, note);
+  recordPlace.value = null;
+};
 const navigateTo = (place: Parameters<typeof select>[0]) => {
   select(place);
   window.open(
@@ -66,6 +111,7 @@ const navigateTo = (place: Parameters<typeof select>[0]) => {
       :parking-count="parkingLots.length"
       :radius="radius"
       :expanding="expanding"
+      :favorite-keys="favorites.map((item) => `${item.kind}-${item.id}`)"
       @input-search="inputSearch"
       @search="search"
       @choose-suggestion="chooseSuggestion"
@@ -74,7 +120,23 @@ const navigateTo = (place: Parameters<typeof select>[0]) => {
       @switch-kind="switchKind"
       @navigate="navigateTo"
       @locate="locate"
+      @favorite="toggleFavorite"
+      @record-parking="recordParking"
     >
+      <template #personal>
+        <ExplorePersonalPanel
+          :favorites="favorites"
+          :recent="recent"
+          :parked="parked"
+          :message="storageMessage"
+          :disabled="blocked || loading || expanding"
+          @open="openSaved"
+          @remove-favorite="removeFavorite"
+          @clear-recent="clearRecent"
+          @edit-parking="editParking"
+          @clear-parking="clearParking"
+        />
+      </template>
       <template #parking-controls>
         <ParkingControls
           :sort="parkingSort"
@@ -91,6 +153,12 @@ const navigateTo = (place: Parameters<typeof select>[0]) => {
       :selected="selected"
       :blocked="blocked"
       @select="select"
+    />
+    <ParkingRecordDialog
+      :place="recordPlace"
+      :note="recordNote"
+      @close="recordPlace = null"
+      @save="saveRecord"
     />
     <ApiUsageDialog
       :open="dialogOpen"
@@ -113,7 +181,7 @@ const navigateTo = (place: Parameters<typeof select>[0]) => {
 - Props：無公開 props。
 - v-model：無。
 - Emits：無。
-- 主要依賴：`ExploreSidebar`、`ExploreMap`、`useExplore`、`ParkingControls`、Google Maps / Places 與各縣市停車 API。
+- 主要依賴：`ExploreSidebar`、`ExploreMap`、`useExplore`、`ExplorePersonalPanel`、`ParkingControls`、`ParkingRecordDialog`、`usePersonalPlaces`、Google Maps / Places 與各縣市停車 API。
 
 ## 主要行為
 
@@ -122,6 +190,7 @@ const navigateTo = (place: Parameters<typeof select>[0]) => {
 - 處理定位、導航與關閉提示事件。
 - 輸入至少兩字並停頓 400ms 後查 Google 建議；首次搜尋自動請求定位，候選依可用直線距離排序；拒絕定位時保留 Google 候選順序。
 - 停車場排除滿位，預設依目的地直線距離排序；可切換剩餘車位由多到少或停一小時費用由低到高。
+- 停車場收藏與最近搜尋保存於瀏覽器，重開地點時重新查詢；停車記錄可保存樓層、區域或車格。
 - 預設搜尋 1 公里；範圍內沒有確定有空位的停車場，自動逐步擴大至 2／3 公里，最多 3 公里；調整狀態會呈現在清單，沿用同一份停車資料及五分鐘時間暫存。
 - 多選排序依勾選先後決定優先順序；勾選剩餘車位時排除未知，全部取消則恢復目的地距離排序；費用只比較可明確推算的一小時費率，條件不明的放在後方。
 - 桌面使用左右欄配置；手機使用上方地圖、下方清單。

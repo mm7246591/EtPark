@@ -8,7 +8,7 @@ import { useDrivingTimes } from './useDrivingTimes';
 import { filterAndSortParking } from '../utils/parkingOptions';
 import { getShortTermParkingFee } from '../utils/parkingFee';
 import { parkingRadius } from '../constants/parking';
-import type { ParkingSort } from '../types/personal';
+import type { SavedPlace, ParkingSort } from '../types/personal';
 import type {
   Coordinates,
   Place,
@@ -309,6 +309,48 @@ export const useExplore = () => {
       if (request === sequence) loading.value = false;
     }
   };
+  const openSaved = async (saved: SavedPlace) => {
+    if (loading.value || blocked.value || disposed) return;
+    clearTimeout(searchTimer);
+    const request = ++sequence;
+    loading.value = true;
+    suggestions.value = [];
+    searching.value = false;
+    try {
+      await ensureOrigin();
+      if (request !== sequence || blocked.value || disposed) return;
+      if (saved.kind === 'food') {
+        if (!mapsConfigured) {
+          message.value = '請先設定 Google Maps API key。';
+          return;
+        }
+        const { Place: GooglePlace } = await loadMapsLibrary('places');
+        if (request !== sequence || blocked.value || disposed) return;
+        loading.value = false;
+        await chooseSuggestion({
+          name: saved.name,
+          description: saved.address,
+          prediction: { toPlace: () => new GooglePlace({ id: saved.id }) },
+        } as SearchSuggestion);
+      } else {
+        await loadNearby({
+          kind: 'food',
+          id: `saved-parking:${saved.id}`,
+          name: saved.name,
+          address: saved.address,
+          location: saved.location,
+          distance: 0,
+        });
+        const lot = parkingLots.value.find((item) => item.id === saved.id);
+        if (lot) selected.value = lot;
+      }
+    } catch (error) {
+      if (!disposed) handleApiError(error);
+      message.value = dialogMessage.value;
+    } finally {
+      if (request === sequence) loading.value = false;
+    }
+  };
   const select = (place: Place) => {
     activeKind.value = place.kind;
     selected.value = place;
@@ -362,6 +404,7 @@ export const useExplore = () => {
     expanding,
     parkingTotal,
     parkingSort,
+    openSaved,
     searching,
     origin,
     searchMessage,
