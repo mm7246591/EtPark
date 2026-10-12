@@ -1,6 +1,6 @@
 # Etpark
 
-Etpark 是結合地點搜尋與停車資訊的網站。使用者輸入店名或地址後，可以查看目的地附近的停車場、剩餘車位與收費資訊，並預覽從目前位置出發的開車路線。
+Etpark 是結合地點搜尋與停車資訊的網站。使用者輸入店名或地址後，可以查看目的地附近的停車場、剩餘車位與收費資訊，並開啟 Google Maps 開車導航。
 
 ## 主要功能
 
@@ -9,8 +9,7 @@ Etpark 是結合地點搜尋與停車資訊的網站。使用者輸入店名或�
 - 查詢目的地所在縣市、距離一公里內的停車場。
 - 停車場依有車位、車位未知、已滿位分組，各組再依距離排序。
 - 顯示停車場地址、來源提供的收費資訊與剩餘車位。
-- 在網站地圖預
-覽開車路線，顯示道路距離與預估時間。
+- 點擊開始導航，開啟 Google Maps 導航至目的地或停車場。
 - 支援桌面及手機版面。
 
 ## 技術
@@ -21,7 +20,6 @@ Etpark 是結合地點搜尋與停車資訊的網站。使用者輸入店名或�
 | 建置           | Vite                                          |
 | 樣式           | Tailwind CSS v3、SCSS                         |
 | 地圖與地點     | Google Maps JavaScript API、Places API（New） |
-| 開車路線       | Google Routes API                             |
 | 停車資料處理   | Node.js、Netlify Functions、proj4             |
 | 回應格式檢查   | Zod Mini                                      |
 | 測試與品質檢查 | Vitest、ESLint、Prettier                      |
@@ -34,7 +32,6 @@ EtPark/
 │   ├── apis/                         # 前端 API 呼叫
 │   │   ├── googleMaps.ts             # Google SDK 載入
 │   │   ├── nationalParking.ts        # 停車資料查詢
-│   │   ├── routes.ts                 # 開車路線查詢
 │   │   ├── requestWithSchema.ts      # HTTP 請求與回應格式檢查
 │   │   ├── schemas/                  # API 回應 schema
 │   │   └── types/                    # API 型別
@@ -46,13 +43,12 @@ EtPark/
 │   ├── components/explore/           # 探索頁子元件
 │   │   ├── ExploreSidebar.vue        # 搜尋與清單
 │   │   ├── ExploreMap.vue            # 地圖與標記
-│   │   ├── ExploreRoutePanel.vue     # 開車路線摘要
 │   │   └── ApiUsageDialog.vue        # API 錯誤提示
 │   ├── composables/
 │   │   └── useApiUsage.ts            # 共用 API 錯誤與提示狀態
 │   ├── views/explore/
 │   │   ├── ExploreView.vue           # 頁面組裝
-│   │   ├── composables/              # 搜尋、地圖與路線邏輯
+│   │   ├── composables/              # 搜尋與地圖邏輯
 │   │   ├── constants/                # 縣市對照資料
 │   │   ├── types/                    # 頁面專屬型別
 │   │   └── utils/                    # 距離與停車資料工具

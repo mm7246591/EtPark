@@ -7,13 +7,11 @@ import {
   listenMapsQuotaError,
 } from '@/apis/googleMaps';
 import type { Place } from '../types/place';
-import type { RoutePreview } from '../types/routes';
 
 export const useExploreMap = (
   host: Ref<HTMLElement | null>,
   places: Ref<Place[]>,
-  selected: Ref<Place | null>,
-  routePreview: Ref<RoutePreview | null>
+  selected: Ref<Place | null>
 ) => {
   const { blocked, handleApiError, dialogMessage } = useApiUsage();
   const markers = shallowRef<
@@ -31,30 +29,6 @@ export const useExploreMap = (
   let markerLibrary: google.maps.MarkerLibrary | undefined;
   let disposed = false;
   let stopListening: (() => void) | undefined;
-  let routeLine: google.maps.Polyline | undefined;
-  const clearRoute = () => {
-    routeLine?.setMap(null);
-    routeLine = undefined;
-  };
-  const renderRoute = () => {
-    clearRoute();
-    if (!map || blocked.value || !routePreview.value) return;
-    const { path } = routePreview.value.driving;
-    const color = getComputedStyle(document.documentElement)
-      .getPropertyValue('--location-primary')
-      .trim();
-    routeLine = new google.maps.Polyline({
-      map,
-      path,
-      strokeColor: color,
-      strokeWeight: 5,
-      strokeOpacity: 0.9,
-      zIndex: 10,
-    });
-    const bounds = new google.maps.LatLngBounds();
-    path.forEach((point) => bounds.extend(point));
-    map.fitBounds(bounds, 40);
-  };
   const clear = () => {
     markers.value.forEach((entry) => {
       const { marker } = entry;
@@ -82,18 +56,14 @@ export const useExploreMap = (
       map.setCenter(places.value[0].location);
       map.setZoom(16);
     }
-    renderRoute();
   };
   watch(places, render);
-  watch(routePreview, renderRoute);
   watch(selected, (place) => {
-    if (!blocked.value && !routePreview.value && place && map)
-      map.panTo(place.location);
+    if (!blocked.value && place && map) map.panTo(place.location);
   });
   watch(blocked, (value) => {
     if (!value) return;
     clear();
-    clearRoute();
     if (map) google.maps.event.clearInstanceListeners(map);
     map = undefined;
     host.value?.replaceChildren();
@@ -132,7 +102,6 @@ export const useExploreMap = (
     disposed = true;
     stopListening?.();
     clear();
-    clearRoute();
     if (map) google.maps.event.clearInstanceListeners(map);
   });
   return { markers, mapError, ready };

@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed, shallowRef, toRef } from 'vue';
 import { useExploreMap } from '../../views/explore/composables/useExploreMap';
-import type { RoutePreview } from '../../views/explore/types/routes';
 import type {
   Place,
   Restaurant,
@@ -13,7 +12,6 @@ const props = defineProps<{
   parkingLots: ParkingLot[];
   selected: Place | null;
   blocked: boolean;
-  routePreview: RoutePreview | null;
 }>();
 const emit = defineEmits<{ select: [place: Place] }>();
 const host = shallowRef<HTMLElement | null>(null);
@@ -24,8 +22,7 @@ const places = computed<Place[]>(() => [
 const { markers, mapError, ready } = useExploreMap(
   host,
   places,
-  toRef(props, 'selected'),
-  toRef(props, 'routePreview')
+  toRef(props, 'selected')
 );
 </script>
 
@@ -129,12 +126,12 @@ const { markers, mapError, ready } = useExploreMap(
 
 ## 元件定位
 
-- 顯示 Google 地圖、目的地與停車場標記與開車路線。
+- 顯示 Google 地圖、目的地與停車場標記。
 - 子元件位於 src/components/explore。
 
 ## 公開介面
 
-- Props：restaurants、parkingLots、selected（可為 null）、blocked、routePreview。
+- Props：restaurants、parkingLots、selected（可為 null）、blocked。
 - v-model：無。
 - Emits：select(place)。
 - 主要依賴：useExploreMap、Google Maps JavaScript API、Vue Teleport。
@@ -154,5 +151,5 @@ const { markers, mapError, ready } = useExploreMap(
 - 卸載後清除標記與地圖事件，非同步初始化忽略已卸載元件。
 - 尺寸、陰影與選取效果使用 tag 上明確數值 Tailwind class；顏色為 variables.scss 的普通 class，色值位於 theme-color.scss。
 - 手機地圖為 28dvh、最小 160px，清單使用剩餘高度；桌面採左右欄。
-- 保留 Google 地圖原有來源標示與控制項；Routes API 路線由父頁面查詢後傳入，地圖僅繪製；不呼叫 Nearby Search。
+- 保留 Google 地圖原有來源標示與控制項；不呼叫 Nearby Search。
 </spec>
