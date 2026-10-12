@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import ParkingControls from '@/components/explore/ParkingControls.vue';
 import ApiUsageDialog from '@/components/explore/ApiUsageDialog.vue';
 import { useApiUsage } from '@/composables/useApiUsage';
 import { getGoogleMapsNavigationUrl } from './utils/navigation';
@@ -8,6 +9,10 @@ import { useExplore } from './composables/useExplore';
 
 const { blocked, dialogOpen, dialogMessage } = useApiUsage();
 const {
+  radius,
+  expanding,
+  parkingTotal,
+  parkingSort,
   searching,
   searchMessage,
   inputSearch,
@@ -50,7 +55,7 @@ const navigateTo = (place: Parameters<typeof select>[0]) => {
       :source="source"
       :parking-notice="parkingNotice"
       :suggestions="suggestions"
-      :loading="loading"
+      :loading="loading || expanding"
       :blocked="blocked"
       :blocked-message="dialogMessage"
       :maps-configured="mapsConfigured"
@@ -59,6 +64,8 @@ const navigateTo = (place: Parameters<typeof select>[0]) => {
       :places="places"
       :food-count="restaurants.length"
       :parking-count="parkingLots.length"
+      :radius="radius"
+      :expanding="expanding"
       @input-search="inputSearch"
       @search="search"
       @choose-suggestion="chooseSuggestion"
@@ -67,7 +74,17 @@ const navigateTo = (place: Parameters<typeof select>[0]) => {
       @switch-kind="switchKind"
       @navigate="navigateTo"
       @locate="locate"
-    />
+    >
+      <template #parking-controls>
+        <ParkingControls
+          :sort="parkingSort"
+          :disabled="loading || expanding || blocked"
+          :total="parkingTotal"
+          :count="parkingLots.length"
+          @sort="parkingSort = $event"
+        />
+      </template>
+    </ExploreSidebar>
     <ExploreMap
       :restaurants="restaurants"
       :parking-lots="parkingLots"
@@ -96,7 +113,7 @@ const navigateTo = (place: Parameters<typeof select>[0]) => {
 - Props：無公開 props。
 - v-model：無。
 - Emits：無。
-- 主要依賴：`ExploreSidebar`、`ExploreMap`、`useExplore`、Google Maps / Places 與各縣市停車 API。
+- 主要依賴：`ExploreSidebar`、`ExploreMap`、`useExplore`、`ParkingControls`、Google Maps / Places 與各縣市停車 API。
 
 ## 主要行為
 
@@ -104,7 +121,9 @@ const navigateTo = (place: Parameters<typeof select>[0]) => {
 - 點擊清單或地圖標記時，同步更新選取項目與所屬分頁。
 - 處理定位、導航與關閉提示事件。
 - 輸入至少兩字並停頓 400ms 後查 Google 建議；首次搜尋自動請求定位，候選依可用直線距離排序；拒絕定位時保留 Google 候選順序。
-- 停車場有車位優先、車位未知其次、滿位最後；各組依目的地直線距離排序。
+- 停車場排除滿位，預設依目的地直線距離排序；可切換剩餘車位由多到少或停一小時費用由低到高。
+- 預設搜尋 1 公里；範圍內沒有確定有空位的停車場，自動逐步擴大至 2／3 公里，最多 3 公里；調整狀態會呈現在清單，沿用同一份停車資料及五分鐘時間暫存。
+- 多選排序依勾選先後決定優先順序；勾選剩餘車位時排除未知，全部取消則恢復目的地距離排序；費用只比較可明確推算的一小時費率，條件不明的放在後方。
 - 桌面使用左右欄配置；手機使用上方地圖、下方清單。
 
 ## 狀態與限制
@@ -113,7 +132,7 @@ const navigateTo = (place: Parameters<typeof select>[0]) => {
 - 色值定義於 `theme-color.scss`；`variables.scss` 只逐一宣告 `text-*`、`bg-*`、`line-*` 等顏色 class，不使用 Tailwind 指令或迴圈。
 - 陰影、格線、hover 與選取效果直接寫在 tag 的 Tailwind class，涉及色值時引用主題 CSS 變數。
 - `main.scss` 只保留 body、鍵盤 focus 等必要全域樣式；必要且 Tailwind 不適合表達的元件樣式才使用 scoped。
-- 地點使用 Google 搜尋；搜尋開放台灣，停車場位置、費率與車位依縣市使用市府或 TDX 資料，距離為一公里內直線距離。
+- 地點使用 Google 搜尋；搜尋開放台灣，停車場位置、費率與車位依縣市使用市府或 TDX 資料，預設 1 公里，沒有可確認的空位時自動擴大至最多 3 公里，距離為目的地到停車場的直線距離；只查所在縣市。
 - 收到供應商的明確配額錯誤時顯示置中 dialog，阻擋後續 Google／停車 API；關閉 dialog 不解除配額封鎖。
 - 網路、逾時與其他服務異常依原因顯示 dialog，恢復後可重試；不在網站預先檢查或計數 API 用量。
 - Google 配額錯誤顯示「今日免費查詢額度已達上限，請明日再試！」；錯誤可能來自每分鐘或每日上限，並不代表費用報表的免費額度已用完。

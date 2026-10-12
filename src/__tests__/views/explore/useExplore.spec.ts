@@ -204,7 +204,7 @@ it('首次搜尋自動請求定位，拒絕後仍搜尋且不重複請求定位'
   expect(explore.origin.value).toBeNull();
 });
 
-it('停車場有位優先、未知其次、滿位最後，各組由近到遠並排除一公里外', async () => {
+it('預設距離目的地由近到遠，排除滿位與一公里外', async () => {
   const center = { lat: 25.03, lng: 121.56 };
   const place = {
     id: 'destination',
@@ -235,10 +235,9 @@ it('停車場有位優先、未知其次、滿位最後，各組由近到遠並�
     prediction: { toPlace: () => place },
   } as never);
   expect(explore.parkingLots.value.map((lot) => lot.id)).toEqual([
+    'unknown',
     'available-near',
     'available-far',
-    'unknown',
-    'full',
   ]);
 });
 
@@ -296,4 +295,143 @@ it('停車時間從目前位置計算，失敗仍保留已取得的車位資訊'
   expect(explore.source.value).toBe('市府');
   expect(explore.parkingLots.value[0]?.spaces).toBe(10);
   expect(mocks.quotaError).toHaveBeenCalledWith(error);
+});
+
+it('一公里有確定空位時不擴大，排序不再查 API', async () => {
+  const explore = useExplore();
+  const center = { lat: 25.03, lng: 121.56 };
+  mocks.parking.mockResolvedValue({
+    lots: [
+      { id: 'near', spaces: 1, location: { lat: 25.031, lng: 121.56 } },
+      { id: 'far', spaces: 20, location: { lat: 25.045, lng: 121.56 } },
+      { id: 'full', spaces: 0, location: center },
+    ],
+    source: '市府',
+    notice: '',
+  });
+  await explore.chooseSuggestion({
+    name: '店家',
+    prediction: {
+      toPlace: () => ({
+        id: 'store',
+        fetchFields: mocks.fields,
+        formattedAddress: '台北市',
+        location: { toJSON: () => center },
+      }),
+    },
+  } as never);
+  expect(explore.parkingLots.value.map((lot) => lot.id)).toEqual(['near']);
+  expect(explore.radius.value).toBe(1000);
+  explore.parkingSort.value = ['spaces'];
+  expect(explore.parkingLots.value.map((lot) => lot.id)).toEqual(['near']);
+  expect(mocks.parking).toHaveBeenCalledTimes(1);
+  expect(mocks.minutes).not.toHaveBeenCalled();
+});
+
+it('自動擴大完成後只查一次最終清單時間，排序不重查時間', async () => {
+  const explore = useExplore();
+  const center = { lat: 25.03, lng: 121.56 };
+  explore.origin.value = center;
+  const near = { lat: 25.031, lng: 121.56 };
+  const far = { lat: 25.045, lng: 121.56 };
+  mocks.parking.mockResolvedValue({
+    lots: [
+      { id: 'near', spaces: null, location: near },
+      { id: 'far', spaces: 20, location: far },
+    ],
+    source: '市府',
+    notice: '',
+  });
+  mocks.minutes.mockResolvedValueOnce([3, 8]);
+  await explore.chooseSuggestion({
+    name: '店家',
+    prediction: {
+      toPlace: () => ({
+        id: 'store',
+        fetchFields: mocks.fields,
+        formattedAddress: '台北市',
+        location: { toJSON: () => center },
+      }),
+    },
+  } as never);
+  expect(mocks.minutes.mock.calls.map((call) => call[1])).toEqual([
+    [near, far],
+  ]);
+  explore.parkingSort.value = ['distance'];
+  expect(explore.parkingLots.value.map((lot) => lot.drivingMinutes)).toEqual([
+    3, 8,
+  ]);
+  expect(mocks.parking).toHaveBeenCalledTimes(1);
+  expect(mocks.minutes).toHaveBeenCalledTimes(1);
+});
+
+it.each([
+  ['unknown', null, 0.015, 2000],
+  ['full', 0, 0.023, 3000],
+  ['empty', null, 0.04, 3000],
+])(
+  '一公里 %s 時自動逐步擴大至 %s，最多三公里並只查一次停車來源',
+  async (_case, spaces, farOffset, expectedRadius) => {
+    vi.useFakeTimers();
+    const center = { lat: 25.03, lng: 121.56 };
+    const explore = useExplore();
+    mocks.parking.mockResolvedValue({
+      lots: [
+        { id: 'near', spaces, location: { lat: 25.031, lng: 121.56 } },
+        {
+          id: 'far',
+          spaces: 20,
+          location: { lat: center.lat + Number(farOffset), lng: center.lng },
+        },
+      ],
+      source: '市府',
+      notice: '',
+    });
+    const pending = explore.chooseSuggestion({
+      name: '店家',
+      prediction: {
+        toPlace: () => ({
+          id: 'store',
+          fetchFields: mocks.fields,
+          formattedAddress: '台北市',
+          location: { toJSON: () => center },
+        }),
+      },
+    } as never);
+    await vi.advanceTimersByTimeAsync(1);
+    expect(explore.expanding.value).toBe(true);
+    expect(explore.radius.value).toBe(1000);
+    await vi.advanceTimersByTimeAsync(499);
+    expect(explore.radius.value).toBe(2000);
+    await vi.advanceTimersByTimeAsync(500);
+    await pending;
+    expect(explore.radius.value).toBe(expectedRadius);
+    expect(explore.loading.value).toBe(false);
+    expect(explore.expanding.value).toBe(false);
+    expect(mocks.parking).toHaveBeenCalledTimes(1);
+  }
+);
+
+it('附近沒有停車資料時最多擴大到三公里，不重試 API 或產生假資料', async () => {
+  vi.useFakeTimers();
+  const center = { lat: 25.03, lng: 121.56 };
+  const explore = useExplore();
+  mocks.parking.mockResolvedValue({ lots: [], source: '市府', notice: '' });
+  const pending = explore.chooseSuggestion({
+    name: '店家',
+    prediction: {
+      toPlace: () => ({
+        id: 'store',
+        fetchFields: mocks.fields,
+        formattedAddress: '台北市',
+        location: { toJSON: () => center },
+      }),
+    },
+  } as never);
+  await vi.advanceTimersByTimeAsync(1000);
+  await pending;
+  expect(explore.radius.value).toBe(3000);
+  expect(explore.parkingLots.value).toEqual([]);
+  expect(mocks.parking).toHaveBeenCalledTimes(1);
+  expect(mocks.minutes).not.toHaveBeenCalled();
 });

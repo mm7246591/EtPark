@@ -5,6 +5,10 @@ import { loadMapsLibrary, mapsConfigured } from '@/apis/googleMaps';
 import { distanceInMeters } from '../utils/parking';
 import { cities } from '../constants/cities';
 import { useDrivingTimes } from './useDrivingTimes';
+import { filterAndSortParking } from '../utils/parkingOptions';
+import { getShortTermParkingFee } from '../utils/parkingFee';
+import { parkingRadius } from '../constants/parking';
+import type { ParkingSort } from '../types/personal';
 import type {
   Coordinates,
   Place,
@@ -20,7 +24,27 @@ export const useExplore = () => {
   const activeKind = shallowRef<PlaceKind>('food');
   const selected = shallowRef<Place | null>(null);
   const destination = shallowRef<Restaurant | null>(null);
-  const parkingLots = shallowRef<ParkingLot[]>([]);
+  const allParkingLots = shallowRef<ParkingLot[]>([]);
+  const radius = shallowRef(parkingRadius);
+  const expanding = shallowRef(false);
+  const parkingSort = shallowRef<ParkingSort[]>([]);
+  const drivingTimes = shallowRef<Record<string, number | null>>({});
+  const parkingTotal = computed(
+    () =>
+      allParkingLots.value.filter(
+        (lot) => lot.spaces !== 0 && lot.distance <= radius.value
+      ).length
+  );
+  const parkingLots = computed(() =>
+    filterAndSortParking(
+      allParkingLots.value.map((lot) => ({
+        ...lot,
+        drivingMinutes: drivingTimes.value[lot.id],
+      })),
+      radius.value,
+      parkingSort.value
+    )
+  );
   const suggestions = shallowRef<SearchSuggestion[]>([]);
   const loading = shallowRef(false);
   const searching = shallowRef(false);
@@ -45,15 +69,61 @@ export const useExplore = () => {
   );
   let sequence = 0;
   let token: google.maps.places.AutocompleteSessionToken | undefined;
+  let timeSequence = 0;
+  const loadTimes = async () => {
+    if (!origin.value || blocked.value || disposed || !mapsConfigured) return;
+    const request = ++timeSequence;
+    const destinationRequest = sequence;
+    const lots = allParkingLots.value.filter(
+      (lot) => lot.spaces !== 0 && lot.distance <= radius.value
+    );
+    const isCurrent = () =>
+      request === timeSequence &&
+      destinationRequest === sequence &&
+      !disposed &&
+      !blocked.value;
+    const minutes = await getMinutes(
+      origin.value,
+      lots.map((lot) => lot.location),
+      isCurrent
+    );
+    if (isCurrent())
+      drivingTimes.value = {
+        ...drivingTimes.value,
+        ...Object.fromEntries(
+          lots.map((lot, index) => [lot.id, minutes[index] ?? null])
+        ),
+      };
+  };
+  const adjustRange = async (request: number) => {
+    const hasSpaces = () =>
+      allParkingLots.value.some(
+        (lot) => (lot.spaces ?? 0) > 0 && lot.distance <= radius.value
+      );
+    while (radius.value < 3000 && !hasSpaces()) {
+      expanding.value = true;
+      // 讓使用者看見自動擴大範圍的狀態，並逐步更新至 2／3 公里。
+      // eslint-disable-next-line no-await-in-loop -- 每次調整都要檢查請求是否仍有效。
+      await new Promise<void>((resolve) => {
+        setTimeout(resolve, 500);
+      });
+      if (request !== sequence || disposed || blocked.value) return;
+      radius.value += 1000;
+    }
+    if (request === sequence) expanding.value = false;
+  };
   const loadNearby = async (place: Restaurant) => {
     if (disposed || blocked.value) return;
     clearTimeout(searchTimer);
     searching.value = false;
     const request = ++sequence;
+    radius.value = parkingRadius;
+    expanding.value = false;
     destination.value = place;
     selected.value = place;
     activeKind.value = 'parking';
-    parkingLots.value = [];
+    allParkingLots.value = [];
+    drivingTimes.value = {};
     source.value = '查詢中';
     parkingNotice.value = '';
     suggestions.value = [];
@@ -67,38 +137,25 @@ export const useExplore = () => {
         '';
       const result = await getCityParking(city, place.location);
       if (request !== sequence) return;
-      parkingLots.value = result.lots
-        .map((lot) => ({
-          ...lot,
-          distance: distanceInMeters(place.location, lot.location),
-        }))
-        .filter((lot) => lot.distance <= 1000)
-        .sort((a, b) => {
-          const priority = (lot: ParkingLot) => {
-            if (lot.spaces === null) return 1;
-            return lot.spaces > 0 ? 0 : 2;
-          };
-          return priority(a) - priority(b) || a.distance - b.distance;
-        });
+      allParkingLots.value = result.lots.map((lot) => ({
+        ...lot,
+        price: getShortTermParkingFee(lot.price ?? ''),
+        distance: distanceInMeters(place.location, lot.location),
+      }));
       source.value = result.source;
       parkingNotice.value = result.notice;
-      if (!parkingLots.value.length && !result.notice)
-        message.value = '此地點一公里內沒有資料來源收錄的停車場。';
-      if (origin.value && parkingLots.value.length) {
-        const lots = parkingLots.value;
-        const isCurrent = () =>
-          request === sequence && !disposed && !blocked.value;
-        const minutes = await getMinutes(
-          origin.value,
-          lots.map((lot) => lot.location),
-          isCurrent
-        );
-        if (isCurrent())
-          parkingLots.value = lots.map((lot, index) => ({
-            ...lot,
-            drivingMinutes: minutes[index] ?? null,
-          }));
+      await adjustRange(request);
+      if (request !== sequence || disposed || blocked.value) return;
+      if (
+        radius.value === 3000 &&
+        !allParkingLots.value.some(
+          (lot) => (lot.spaces ?? 0) > 0 && lot.distance <= radius.value
+        )
+      ) {
+        message.value =
+          '3 公里內尚無可確認有空位的停車場，可查看未知車位的停車場或更換目的地。';
       }
+      await loadTimes();
     } catch (error) {
       if (!disposed) handleApiError(error);
       if (request === sequence) {
@@ -106,7 +163,10 @@ export const useExplore = () => {
         message.value = dialogMessage.value;
       }
     } finally {
-      if (request === sequence) loading.value = false;
+      if (request === sequence) {
+        loading.value = false;
+        expanding.value = false;
+      }
     }
   };
   let locationRequest: Promise<void> | undefined;
@@ -298,6 +358,10 @@ export const useExplore = () => {
       loadNearby(destination.value);
   };
   return {
+    radius,
+    expanding,
+    parkingTotal,
+    parkingSort,
     searching,
     origin,
     searchMessage,

@@ -32,6 +32,8 @@ const props = defineProps<{
   places: Place[];
   foodCount: number;
   parkingCount: number;
+  radius?: number;
+  expanding?: boolean;
 }>();
 const emit = defineEmits<{
   inputSearch: [query: string];
@@ -268,6 +270,33 @@ watch(
           tabindex="0"
           class="bg-primary flex-1 shrink-0 p-[16px] md:min-h-[0px] md:overflow-y-auto"
         >
+          <slot
+            v-if="activeKind === 'parking' && foodCount"
+            name="parking-controls"
+          ></slot>
+          <p
+            v-if="activeKind === 'parking' && foodCount"
+            role="status"
+            :aria-busy="expanding ?? false"
+            class="text-secondary mb-[12px] flex items-center gap-[6px] text-[12px]"
+          >
+            <span
+              aria-hidden="true"
+              class="material-symbols-rounded text-[18px]"
+              :class="
+                expanding ? 'animate-pulse motion-reduce:animate-none' : ''
+              "
+            >
+              radar
+            </span>
+            <span>
+              {{
+                expanding
+                  ? '正在調整搜尋範圍…'
+                  : `搜尋範圍 ${(radius ?? 1000) / 1000} 公里`
+              }}
+            </span>
+          </p>
           <p
             v-if="noticeMessage"
             role="status"
@@ -290,21 +319,21 @@ watch(
             {{ blockedMessage }}
           </p>
           <p
-            v-else-if="loading"
+            v-else-if="loading && !expanding"
             role="status"
             class="text-secondary mb-[12px] text-[14px]"
           >
             資料載入中…
           </p>
           <p
-            v-else-if="!places.length"
+            v-else-if="!loading && !places.length"
             class="text-secondary mb-[12px] text-[14px]"
           >
             {{
               activeKind === 'food'
                 ? '搜尋並選擇目的地，或使用目前位置。'
                 : foodCount
-                  ? '此地點一公里內沒有可顯示的停車資料。'
+                  ? `目前 ${(radius ?? 1000) / 1000} 公里範圍與篩選條件下沒有停車場，可調整排序或更換目的地。`
                   : '尚無附近停車場，請先選擇目的地。'
             }}
           </p>
@@ -377,7 +406,7 @@ watch(
                 <template v-else>
                   {{ place.address }}
                   <br />
-                  直線距離 {{ place.distance }}m
+                  {{ place.distance }} m
                   <br />
                   {{ place.price }}
                 </template>
@@ -415,7 +444,7 @@ watch(
 
 ## 公開介面
 
-- Props：searching、searchMessage、noticeMessage、source、parkingNotice、activeKind、selected（可為 null）、places、foodCount、parkingCount、suggestions、loading、blocked、blockedMessage、mapsConfigured。
+- Props：searching、searchMessage、noticeMessage、source、parkingNotice、activeKind、selected（可為 null）、places、foodCount、parkingCount、suggestions、loading、blocked、blockedMessage、mapsConfigured、radius、expanding。
 - v-model：無公開 v-model，query 為內部輸入狀態。
 - Emits：inputSearch、search、chooseSuggestion、refresh、select、switchKind、navigate、locate。
 - 主要依賴：views/explore/types/place、Vue、Reka UI Combobox／Tabs、Tailwind CSS v3。
@@ -425,12 +454,14 @@ watch(
 - 搜尋候選只顯示店名與地址，不顯示距離或時間，也不查詢候選的行車時間。
 - 停車場剩餘車位下方顯示從目前位置出發的預估開車分鐘；缺少定位、查無路線或時間尚未取得時省略。
 - 點擊開始導航向父頁面回報 navigate，以開啟 Google Maps 開車導航。
+- 自動擴大時以 radar 圖示及「正在調整搜尋範圍…」顯示狀態，完成後顯示目前範圍；期間停用搜尋避免重複請求。
+- parking-controls slot 由父頁面提供排序介面。
 
 - 使用者直接輸入店名或地址，縣市由頁面流程自動判斷，不提供手動縣市選單。
 - 中文組字完成後發出 inputSearch，由頁面延遲 400ms 查建議；點擊搜尋按鈕可立即搜尋；搜尋框 Enter 僅確認組字，不搜尋或選店。
 - 建議只呈現名稱與地址；方向鍵移動候選高亮，點擊店家選取，Escape 關閉。
 - 搜尋時由頁面自動取得定位；拒絕定位仍能搜尋，選擇建議時發出 chooseSuggestion。
-- 顯示地址、來源收費說明、直線距離與車位；未知、滿位與少量車位以文字區分。
+- 顯示地址、臨停收費說明、距離（X m）與車位；已滿位不列入清單。
 - 分頁支援方向鍵、Home 與 End；清單使用穩定 id。
 - 定位、導航與更新操作由父元件處理。
 
