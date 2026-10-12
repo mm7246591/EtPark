@@ -40,10 +40,10 @@ watch(
   >
     <DialogPortal>
       <DialogOverlay
-        class="fixed inset-[0px] z-[60] bg-[color:var(--shadow-deep)]"
+        class="fixed inset-[0px] z-[60] bg-[color:var(--mask-dialog)]"
       />
       <DialogContent
-        class="bg-card text-primary fixed left-[50%] top-[50%] z-[60] w-[calc(100%-32px)] max-w-[380px] translate-x-[-50%] translate-y-[-50%] rounded-[16px] p-[24px] shadow-[0_10px_30px_var(--shadow-medium)]"
+        class="bg-card text-primary line-primary fixed left-[50%] top-[50%] z-[60] w-[calc(100%-32px)] max-w-[380px] translate-x-[-50%] translate-y-[-50%] rounded-[16px] border-[1px] p-[24px] shadow-[0_10px_30px_var(--shadow-medium)]"
         @open-auto-focus.prevent="focusInput"
         @close-auto-focus.prevent="returnFocus?.focus()"
         @interact-outside.prevent
@@ -110,6 +110,6 @@ watch(
 
 ## 狀態與限制
 
-- Reka UI modal 提供焦點限制，Escape 可關閉；備註最多 160 字，不呼叫 API。
+- Reka UI modal 提供焦點限制，Escape 可關閉；遮罩使用 `--mask-dialog`，外框與 ApiUsageDialog 一致；備註最多 160 字，不呼叫 API。
 - 尺寸與陰影使用 tag 上明確數值 Tailwind class；顏色引用主題 CSS 變數及 variables.scss 普通 class。
 </spec>
