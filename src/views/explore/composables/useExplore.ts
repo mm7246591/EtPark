@@ -146,15 +146,6 @@ export const useExplore = () => {
       parkingNotice.value = result.notice;
       await adjustRange(request);
       if (request !== sequence || disposed || blocked.value) return;
-      if (
-        radius.value === 3000 &&
-        !allParkingLots.value.some(
-          (lot) => (lot.spaces ?? 0) > 0 && lot.distance <= radius.value
-        )
-      ) {
-        message.value =
-          '3 公里內尚無可確認有空位的停車場，可查看未知車位的停車場或更換目的地。';
-      }
       await loadTimes();
     } catch (error) {
       if (!disposed) handleApiError(error);
