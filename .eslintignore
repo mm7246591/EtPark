@@ -1,0 +1,9 @@
+node_modules/
+dist/
+coverage/
+public/
+design-preview/
+.agents/
+.claude/
+.codex/
+*.d.ts

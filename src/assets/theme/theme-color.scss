@@ -1,0 +1,50 @@
+:root {
+  // Brand
+  --brand-primary: #778873;
+  --brand-secondary: #dccfc0;
+  --brand-tertiary: #4b6047;
+
+  // Text
+  --text-inverse: #fffdf9;
+  --text-primary: #344232;
+  --text-secondary: #65705f;
+  --text-food-text: #493e32;
+  --text-food-outline: #675746;
+  --text-rating: #79572f;
+  --text-forest: #4b6047;
+  --text-few-text: #4e391b;
+  --text-white: #ffffff;
+
+  // Line
+  --line-primary: #dfd7cc;
+  --line-food: #dccfc0;
+  --line-parking: #778873;
+  --line-selected: #a1bc98;
+  --line-food-marker: #675746;
+  --line-inverse: #fffdf9;
+  --line-white: #ffffff;
+  --line-focus: #4b6047;
+
+  // Background
+  --background-primary: #fdf6ed;
+  --background-card: #fffdf9;
+  --background-food-active: #f3e8da;
+  --background-available: #e8efe2;
+  --background-selected: rgb(161 188 152 / 50%);
+
+  // Status
+  --status-full: #b54d4d;
+  --status-few: #e8b75e;
+  --status-full-marker: #7b756b;
+
+  // Location
+  --location-primary: #2f80ed;
+
+  // Mask
+  --mask-dialog: rgb(0 0 0 / 35%);
+
+  // Shadow
+  --shadow-soft: rgb(0 0 0 / 5%);
+  --shadow-medium: rgb(0 0 0 / 10%);
+  --shadow-location: #2f80ed;
+}
