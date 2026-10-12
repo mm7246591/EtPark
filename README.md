@@ -6,11 +6,13 @@ EtPark 是結合地點搜尋與停車資訊的網站。使用者輸入店名或�
 
 - 搜尋台灣店家或地址，提供候選地點與地址資訊。
 - 取得定位後，候選地點依可用的直線距離由近到遠排序。
-- 查詢目的地所在縣市、距離一公里內的停車場。
-- 停車場依有車位、車位未知、已滿位分組，各組再依距離排序。
-- 顯示停車場地址、來源提供的收費資訊與剩餘車位。
+- 查詢目的地所在縣市，預設查詢一公里內的停車場，沒有確定有空位的停車場時，自動擴大至兩公里、最多三公里。
+- 不顯示已滿位的停車場，預設依目的地距離由近到遠；可改用剩餘車位由多到少或停一小時費用由低到高排序，可多選排序，依勾選先後比較；選剩餘車位時排除未知，全部取消恢復距離排序。
+- 顯示停車場地址、臨停收費資訊與剩餘車位，不顯示月租／月票內容。
 - 定位後顯示目前位置到停車場的預估開車分鐘（不含即時路況）。
 - 點擊開始導航，開啟 Google Maps 導航至目的地或停車場。
+- 收藏停車場、查看最近十筆店家搜尋，重開時重新查詢地點或車位。
+- 記錄停車場樓層、區域與車格，支援編輯及清除。
 - 支援桌面及手機版面。
 
 ## 技術
@@ -34,6 +36,7 @@ EtPark/
 │   ├── apis/                         # 前端 API 呼叫
 │   │   ├── googleMaps.ts             # Google SDK 載入
 │   │   ├── nationalParking.ts        # 停車資料查詢
+│   │   ├── routes.ts                 # 批次查行車時間
 │   │   ├── requestWithSchema.ts      # HTTP 請求與回應格式檢查
 │   │   ├── schemas/                  # API 回應 schema
 │   │   └── types/                    # API 型別
@@ -45,12 +48,15 @@ EtPark/
 │   ├── components/explore/           # 探索頁子元件
 │   │   ├── ExploreSidebar.vue        # 搜尋與清單
 │   │   ├── ExploreMap.vue            # 地圖與標記
+│   │   ├── ParkingControls.vue       # 排序與車位篩選
+│   │   ├── ExplorePersonalPanel.vue  # 收藏、最近搜尋與停車記錄
+│   │   ├── ParkingRecordDialog.vue   # 停車位置備註
 │   │   └── ApiUsageDialog.vue        # API 錯誤提示
 │   ├── composables/
 │   │   └── useApiUsage.ts            # 共用 API 錯誤與提示狀態
 │   ├── views/explore/
 │   │   ├── ExploreView.vue           # 頁面組裝
-│   │   ├── composables/              # 搜尋與地圖邏輯
+│   │   ├── composables/              # 搜尋、地圖、行車時間與本機紀錄
 │   │   ├── constants/                # 縣市對照資料
 │   │   ├── types/                    # 頁面專屬型別
 │   │   └── utils/                    # 距離與停車資料工具
@@ -79,3 +85,5 @@ EtPark/
 正式環境需在 Netlify 設定相同的環境變數：`VITE_` 變數供建置使用，TDX 變數供 Functions 使用。前端與 Functions 必須一起部署；僅拖曳上傳 `dist` 不會部署停車 API。
 
 行車時間需啟用 Routes API 並加入 Google API 金鑰的 API 限制。Route Matrix 按起點與終點組合的元素數計算用量，需另外設定配額；既有 Maps／Places 配額不包含此服務。
+
+收藏與最近搜尋僅保存在目前瀏覽器，地點資料保留 30 天；停車記錄保留至手動清除。保存紀錄不保留舊車位與行車時間，不跨裝置同步。費率排序僅比較可明確推算的一小時費用，條件不明的費率排在後方。
