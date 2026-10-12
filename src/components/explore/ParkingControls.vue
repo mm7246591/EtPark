@@ -126,12 +126,7 @@ watch(
             :key="option.value"
             :model-value="sort.includes(option.value)"
             :disabled="disabled"
-            class="mb-[4px] flex cursor-pointer items-center gap-[8px] rounded-[6px] px-[10px] py-[9px] text-[14px] outline-none focus-visible:outline-[2px] focus-visible:outline-offset-[-2px] focus-visible:outline-[color:var(--line-focus)]"
-            :class="
-              sort.includes(option.value)
-                ? 'bg-available text-forest'
-                : 'text-primary'
-            "
+            class="text-primary mb-[4px] flex cursor-pointer items-center gap-[8px] rounded-[6px] px-[10px] py-[9px] text-[14px] outline-none focus-visible:outline-[2px] focus-visible:outline-offset-[-2px] focus-visible:outline-[color:var(--line-focus)]"
             @select.prevent
             @update:model-value="choose(option.value)"
           >
@@ -146,7 +141,7 @@ watch(
             <span class="flex-1">{{ option.label }}</span>
             <span
               v-if="sort.includes(option.value)"
-              class="text-forest font-[700]"
+              class="font-[700]"
               :aria-label="`第 ${sort.indexOf(option.value) + 1} 優先`"
             >
               {{ priority(option.value) }}
@@ -179,7 +174,7 @@ watch(
 - 點選或取消排序時維持展開；支援方向鍵、Escape、點擊外部關閉。
 - 排序規則以排序方式旁的驚嘆號按鈕點擊展開浮動說明（Popover），再次點擊、Escape 或點擊外部關閉，下拉選單關閉時一併收起；由 Reka UI 計算位置並避開視窗邊緣，圖示僅有 cursor pointer，沒有 hover 動畫或變色。
 - 下拉箭頭使用 200ms 旋轉動畫，減少動態效果偏好時停用動畫。
-- 選項不使用 hover 背景效果；已勾選固定顯示綠色底，未勾選保持原底色，鍵盤聚焦以 outline 提示。
+- 選項不使用 hover 背景效果；勾選時只顯示打勾與①②③優先序，文字與底色維持不變，鍵盤聚焦以 outline 提示。
 
 ## 狀態與限制
 
