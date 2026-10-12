@@ -1,6 +1,6 @@
 import proj4 from 'proj4';
 
-class ParkingQuotaError extends Error {}
+class ParkingRateLimitError extends Error {}
 const maxResponseBytes = 5 * 1024 * 1024;
 
 const cities = [
@@ -52,7 +52,7 @@ const fetchJSON = async (url, options = {}) => {
     signal: AbortSignal.timeout(20000),
   });
   if (tdx && response.status === 429) {
-    throw new ParkingQuotaError('TDX quota exceeded');
+    throw new ParkingRateLimitError('TDX rate limit exceeded');
   }
   if (!response.ok) throw new Error(`Upstream HTTP ${response.status}`);
   if (!tdx) return response.json();
@@ -215,7 +215,7 @@ const getCityParking = async (city, env) => {
           ntpc ? readNTPC(staticURL) : fetchJSON(staticURL)
         ),
         (ntpc ? readNTPC(liveURL) : fetchJSON(liveURL)).catch((error) => {
-          if (error instanceof ParkingQuotaError) throw error;
+          if (error instanceof ParkingRateLimitError) throw error;
           return null;
         }),
       ]);
@@ -277,7 +277,7 @@ const getCityParking = async (city, env) => {
         cached(`tdx-desc:${city}`, 300000, () => readTDX('CarPark')),
         availabilityCities.includes(city)
           ? readTDX('ParkingAvailability').catch((error) => {
-              if (error instanceof ParkingQuotaError) throw error;
+              if (error instanceof ParkingRateLimitError) throw error;
               return null;
             })
           : Promise.resolve(null),
@@ -357,9 +357,18 @@ const handleNationalParking = async (request, response, env = process.env) => {
     const network =
       error.name === 'TimeoutError' ||
       (error instanceof TypeError && /fetch/i.test(error.message));
-    let status = network ? 504 : 502;
-    if (error instanceof ParkingQuotaError) status = 429;
-    response.writeHead(status, { 'Content-Type': 'application/json' });
+    // TDX 429 是每分鐘呼叫上限，稍候即可恢復，告知前端重試時間。
+    if (error instanceof ParkingRateLimitError) {
+      response.writeHead(429, {
+        'Content-Type': 'application/json',
+        'Retry-After': '60',
+      });
+      response.end(JSON.stringify({ message: 'Parking rate limited' }));
+      return;
+    }
+    response.writeHead(network ? 504 : 502, {
+      'Content-Type': 'application/json',
+    });
     response.end(JSON.stringify({ message: 'Parking source unavailable' }));
   }
 };

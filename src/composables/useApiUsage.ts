@@ -27,11 +27,16 @@ const handleApiError = (error: unknown) => {
     ].includes(code) ||
     /\b(OverQuotaMapError|RESOURCE_EXHAUSTED|OVER_QUERY_LIMIT|OVER_DAILY_LIMIT)\b/.test(
       message
-    ) ||
-    message === 'HTTP 429';
+    );
   if (quota) {
     stop('今日免費查詢額度已達上限，請明日再試！');
     return true;
+  }
+  // 停車 API 的 HTTP 429 來自 TDX 每分鐘呼叫上限，稍候即可恢復，不封鎖查詢。
+  if (message === 'HTTP 429') {
+    dialogMessage.value = '停車資料查詢太頻繁，請稍候約一分鐘再試。';
+    dialogOpen.value = true;
+    return false;
   }
   const network =
     (typeof navigator !== 'undefined' && navigator.onLine === false) ||

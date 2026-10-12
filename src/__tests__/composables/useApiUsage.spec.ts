@@ -44,6 +44,16 @@ it.each([
   );
 });
 
+it('停車 API 每分鐘上限只提示稍候，不封鎖後續查詢', () => {
+  const usage = useApiUsage();
+  expect(usage.handleApiError(new Error('HTTP 429'))).toBe(false);
+  expect(usage.blocked.value).toBe(false);
+  expect(usage.dialogOpen.value).toBe(true);
+  expect(usage.dialogMessage.value).toBe(
+    '停車資料查詢太頻繁，請稍候約一分鐘再試。'
+  );
+});
+
 it.each([
   new TypeError('Failed to fetch'),
   new DOMException('Timed out', 'TimeoutError'),

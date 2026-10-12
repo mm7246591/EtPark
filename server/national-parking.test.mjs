@@ -114,17 +114,19 @@ it('依 TDX 實際包裝欄位讀取停車場與車位', async () => {
   }
 });
 
-it('TDX 來源拒絕配額時回傳 429，不需要本機用量保護設定', async () => {
+it('TDX 每分鐘上限回傳 429 與重試秒數，不需要本機用量保護設定', async () => {
   const original = globalThis.fetch;
   let calls = 0;
   let status;
+  let headers;
   globalThis.fetch = async () => {
     calls += 1;
     return new Response('API rate limit exceeded', { status: 429 });
   };
   const response = {
-    writeHead: (code) => {
+    writeHead: (code, values) => {
       status = code;
+      headers = values;
       return response;
     },
     end: () => {},
@@ -136,6 +138,7 @@ it('TDX 來源拒絕配額時回傳 429，不需要本機用量保護設定', as
       { TDX_CLIENT_ID: 'test', TDX_CLIENT_SECRET: 'test' }
     );
     expect(status).toBe(429);
+    expect(headers['Retry-After']).toBe('60');
     expect(calls).toBeGreaterThan(0);
   } finally {
     globalThis.fetch = original;
