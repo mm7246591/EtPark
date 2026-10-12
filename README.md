@@ -13,8 +13,6 @@ Etpark 是結合地點搜尋與停車資訊的網站。使用者輸入店名或�
 覽開車路線，顯示道路距離與預估時間。
 - 支援桌面及手機版面。
 
-停車資料來自台北市、新北市政府開放資料及交通部 TDX。資料涵蓋程度與即時車位依來源而異；未提供的車位顯示為未知。開車路線是預覽功能，不提供即時交通或語音導航。
-
 ## 技術
 
 | 項目           | 使用技術                                      |
@@ -27,37 +25,6 @@ Etpark 是結合地點搜尋與停車資訊的網站。使用者輸入店名或�
 | 停車資料處理   | Node.js、Netlify Functions、proj4             |
 | 回應格式檢查   | Zod Mini                                      |
 | 測試與品質檢查 | Vitest、ESLint、Prettier                      |
-
-## 本機開發
-
-建議使用 Node.js 24 與 npm。
-
-```sh
-npm ci
-npm run dev
-```
-
-開啟終端機顯示的網址。本機停車 API 由 Vite middleware 提供，不需要另外啟動後端。
-
-## 環境變數
-
-在專案根目錄建立 `.env.local`：
-
-```dotenv
-VITE_GOOGLE_MAPS_API_KEY=
-VITE_GOOGLE_MAPS_MAP_ID=
-TDX_CLIENT_ID=
-TDX_CLIENT_SECRET=
-```
-
-| 變數                       | 用途                                            |
-| -------------------------- | ----------------------------------------------- |
-| `VITE_GOOGLE_MAPS_API_KEY` | Google 地圖、地點搜尋及開車路線使用的瀏覽器金鑰 |
-| `VITE_GOOGLE_MAPS_MAP_ID`  | Google 地圖 ID；本機可使用 `DEMO_MAP_ID`        |
-| `TDX_CLIENT_ID`            | TDX 伺服器端驗證識別碼                          |
-| `TDX_CLIENT_SECRET`        | TDX 伺服器端驗證密鑰                            |
-
-Google 專案需啟用 Maps JavaScript API、Places API（New）與 Routes API，金鑰需允許對應服務及網站網域。TDX 變數供後端使用，不得加上 `VITE_` 前綴。`.env.local` 不提交至 Git。
 
 ## 目錄結構
 
@@ -106,21 +73,6 @@ EtPark/
 ```
 
 頁面元件放在 `src/views`，子元件放在 `src/components`；頁面專屬的邏輯、型別及常數與頁面共置，共用邏輯則放在 `src` 對應目錄。
-
-## 常用指令
-
-| 指令                   | 用途                             |
-| ---------------------- | -------------------------------- |
-| `npm run dev`          | 啟動本機開發服務                 |
-| `npm run build`        | 型別檢查並建置至 `dist`          |
-| `npm run preview`      | 預覽前端建置產物，不包含停車 API |
-| `npm run api`          | 啟動獨立停車 API，預設埠為 3001  |
-| `npm test`             | 執行測試                         |
-| `npm run type-check`   | 檢查 TypeScript 型別             |
-| `npm run lint`         | 檢查程式碼規範                   |
-| `npm run lint:fix`     | 自動修正可處理的規範問題         |
-| `npm run format:check` | 檢查格式                         |
-| `npm run format`       | 格式化 src 檔案                  |
 
 ## 部署
 
