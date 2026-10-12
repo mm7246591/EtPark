@@ -47,7 +47,13 @@ it('搜尋候選只呈現店名地址，停車場保留分鐘與開始導航', a
   expect(html).toContain('EtPark</h1>');
   expect(html).toContain('店家');
   expect(html).toContain('台北市');
-  expect(html.slice(0, html.indexOf('</ul>'))).not.toMatch(/約 \d+ 分鐘/);
+  expect(html).toContain('role="listbox"');
+  const suggestions = html.slice(
+    html.indexOf('role="listbox"'),
+    html.indexOf('aria-label="搜尋類別"')
+  );
+  expect(suggestions).toContain('店家');
+  expect(suggestions).not.toMatch(/約 \d+ 分鐘/);
   expect(html).not.toContain('1.2 km');
   expect(html.indexOf('剩餘車位：12')).toBeLessThan(html.indexOf('約 7 分鐘'));
   expect(html).toContain('開始導航');
