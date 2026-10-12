@@ -43,7 +43,7 @@ const rememberFocus = () => {
           {{ message }}
         </AlertDialogDescription>
         <AlertDialogAction
-          class="bg-brand-tertiary mt-[24px] min-h-[44px] w-[100%] rounded-[8px] px-[16px] py-[10px] text-[14px] text-white"
+          class="bg-brand-primary mt-[24px] min-h-[44px] w-[100%] rounded-[8px] px-[16px] py-[10px] text-[14px] text-white hover:bg-[color:var(--brand-tertiary)]"
         >
           確定
         </AlertDialogAction>

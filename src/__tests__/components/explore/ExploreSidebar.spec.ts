@@ -55,7 +55,10 @@ it('搜尋候選只呈現店名地址，停車場保留分鐘與開始導航', a
   expect(suggestions).toContain('店家');
   expect(suggestions).not.toMatch(/約 \d+ 分鐘/);
   expect(html).not.toContain('1.2 km');
-  expect(html.indexOf('剩餘車位：12')).toBeLessThan(html.indexOf('約 7 分鐘'));
+  expect(html).toContain('剩餘車位');
+  expect(html).toMatch(/>\s*12\s*</);
+  expect(html).toContain('200 m');
+  expect(html).toContain('開車約 7 分鐘');
   expect(html).toContain('開始導航');
   expect(html).not.toContain('開車路線');
 });

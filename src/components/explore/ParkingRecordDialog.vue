@@ -72,13 +72,13 @@ watch(
           ></textarea>
           <div class="mt-[16px] flex justify-end gap-[8px]">
             <DialogClose
-              class="bg-primary rounded-[8px] px-[16px] py-[10px] text-[14px]"
+              class="bg-card line-control rounded-[8px] border-[1px] px-[16px] py-[10px] text-[14px]"
             >
               取消
             </DialogClose>
             <button
               type="submit"
-              class="bg-brand-primary rounded-[8px] px-[16px] py-[10px] text-[14px] text-white"
+              class="bg-brand-primary rounded-[8px] px-[16px] py-[10px] text-[14px] text-white hover:bg-[color:var(--brand-tertiary)]"
             >
               儲存記錄
             </button>

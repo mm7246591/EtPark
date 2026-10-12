@@ -105,18 +105,16 @@ watch(
     @update:model-value="(value) => emit('switchKind', value as PlaceKind)"
   >
     <aside
-      class="bg-card z-[10] flex min-h-[0px] w-[100%] flex-1 flex-col overflow-y-auto shadow-[0_10px_15px_-3px_var(--shadow-medium),0_4px_6px_-4px_var(--shadow-medium)] md:h-[100%] md:w-[380px] md:flex-none md:shrink-0 md:overflow-hidden"
+      class="bg-card z-[10] flex min-h-[0px] w-[100%] flex-1 flex-col overflow-y-auto shadow-[0_-1px_0_var(--line-primary)] md:h-[100%] md:w-[380px] md:flex-none md:shrink-0 md:overflow-hidden md:shadow-[1px_0_0_var(--line-primary)]"
       aria-label="周邊美食與停車場"
     >
       <header
-        class="bg-brand-primary text-inverse shrink-0 px-[16px] py-[10px] md:px-[20px] md:py-[20px]"
+        class="flex shrink-0 items-baseline justify-between gap-[12px] px-[16px] pb-[10px] pt-[14px] md:px-[20px] md:pb-[12px] md:pt-[20px]"
       >
-        <h1 class="text-[24px] font-[700]">EtPark</h1>
-        <p class="mt-[4px] text-[14px]">找到目的地，也找到停車位</p>
+        <h1 class="text-forest text-[24px] font-[700]">EtPark</h1>
+        <p class="text-secondary text-[12px]">找到目的地，也找到停車位</p>
       </header>
-      <div
-        class="line-primary shrink-0 border-b-[1px] px-[16px] py-[10px] md:px-[20px] md:py-[12px]"
-      >
+      <div class="shrink-0 px-[16px] pb-[12px] md:px-[20px]">
         <ComboboxRoot
           :open="showSuggestions && suggestions.length > 0"
           :ignore-filter="true"
@@ -138,7 +136,7 @@ watch(
             <ComboboxInput
               id="destination-query"
               v-model="query"
-              class="line-primary bg-primary min-w-[0px] flex-1 rounded-[8px] border-[1px] px-[10px] py-[10px] text-[14px]"
+              class="line-control bg-card min-w-[0px] flex-1 rounded-[10px] border-[1px] px-[12px] py-[10px] text-[14px]"
               placeholder="輸入台灣店名或地址"
               :disabled="blocked || loading || !mapsConfigured"
               @update:model-value="updateQuery"
@@ -148,7 +146,7 @@ watch(
             />
             <button
               type="button"
-              class="bg-brand-tertiary flex items-center gap-[4px] rounded-[8px] px-[12px] text-[14px] text-white disabled:opacity-[0.5]"
+              class="bg-brand-primary text-inverse flex items-center gap-[4px] rounded-[10px] px-[14px] text-[14px] font-[500] hover:bg-[color:var(--brand-tertiary)] disabled:opacity-[0.4] disabled:hover:bg-[color:var(--brand-primary)]"
               :disabled="blocked || loading || !mapsConfigured || !query.trim()"
               @click="emit('search', query)"
             >
@@ -185,7 +183,7 @@ watch(
               :key="suggestion.id"
               :value="suggestion.id"
               :disabled="blocked || loading"
-              class="line-primary block w-[100%] cursor-pointer rounded-[6px] border-b-[1px] px-[8px] py-[10px] text-left text-[14px] outline-none hover:bg-[color:var(--background-primary)] data-[highlighted]:bg-[color:var(--background-available)]"
+              class="line-primary block w-[100%] cursor-pointer rounded-[8px] border-b-[1px] px-[10px] py-[10px] text-left text-[14px] outline-none last:border-b-[0px] hover:bg-[color:var(--background-primary)] data-[highlighted]:bg-[color:var(--background-available)]"
               @select="choose(suggestion)"
             >
               <span class="text-primary font-[700]">{{ suggestion.name }}</span>
@@ -197,9 +195,9 @@ watch(
             </ComboboxItem>
           </ComboboxContent>
         </ComboboxRoot>
-        <div class="mt-[10px] flex flex-wrap gap-[8px]">
+        <div class="ml-[-8px] mt-[8px] flex flex-wrap gap-[4px]">
           <button
-            class="bg-primary inline-flex items-center gap-[6px] rounded-[6px] px-[10px] py-[8px] text-[12px] disabled:opacity-[0.5]"
+            class="text-forest inline-flex items-center gap-[4px] rounded-[8px] px-[8px] py-[6px] text-[14px] font-[500] hover:bg-[color:var(--background-available)] disabled:opacity-[0.4] disabled:hover:bg-transparent"
             :disabled="blocked || loading"
             @click="emit('locate')"
           >
@@ -212,7 +210,7 @@ watch(
             <span>目前位置</span>
           </button>
           <button
-            class="bg-primary inline-flex items-center gap-[6px] rounded-[6px] px-[10px] py-[8px] text-[12px] disabled:opacity-[0.5]"
+            class="text-forest inline-flex items-center gap-[4px] rounded-[8px] px-[8px] py-[6px] text-[14px] font-[500] hover:bg-[color:var(--background-available)] disabled:opacity-[0.4] disabled:hover:bg-transparent"
             :disabled="blocked || loading || !foodCount"
             @click="emit('refresh')"
           >
@@ -228,17 +226,12 @@ watch(
         <slot name="personal"></slot>
       </div>
       <TabsList
-        class="line-primary flex shrink-0 border-b-[1px]"
+        class="line-primary flex shrink-0 border-b-[1px] px-[8px] md:px-[12px]"
         aria-label="搜尋類別"
       >
         <TabsTrigger
           value="food"
-          class="flex flex-1 items-center justify-center gap-[6px] border-b-[3px] p-[12px] text-[14px]/[20px] font-[700] transition"
-          :class="
-            activeKind === 'food'
-              ? 'line-food bg-food-active text-food-outline'
-              : 'text-secondary border-transparent hover:bg-[color:var(--background-primary)]'
-          "
+          class="text-secondary mb-[-1px] flex flex-1 items-center justify-center gap-[6px] border-b-[2px] border-transparent p-[12px] text-[14px]/[20px] font-[700] tabular-nums transition hover:text-[color:var(--text-primary)] data-[state=active]:border-[color:var(--line-food)] data-[state=active]:text-[color:var(--text-food-outline)]"
         >
           <span
             aria-hidden="true"
@@ -250,12 +243,7 @@ watch(
         </TabsTrigger>
         <TabsTrigger
           value="parking"
-          class="flex flex-1 items-center justify-center gap-[6px] border-b-[3px] p-[12px] text-[14px]/[20px] font-[700] transition"
-          :class="
-            activeKind === 'parking'
-              ? 'line-parking bg-available text-forest'
-              : 'text-secondary border-transparent hover:bg-[color:var(--background-primary)]'
-          "
+          class="text-secondary mb-[-1px] flex flex-1 items-center justify-center gap-[6px] border-b-[2px] border-transparent p-[12px] text-[14px]/[20px] font-[700] tabular-nums transition hover:text-[color:var(--text-primary)] data-[state=active]:border-[color:var(--line-parking)] data-[state=active]:text-[color:var(--text-forest)]"
         >
           <span
             aria-hidden="true"
@@ -346,11 +334,11 @@ watch(
           <article
             v-for="place in places"
             :key="`${place.kind}-${place.id}`"
-            class="bg-card mb-[12px] rounded-[12px] border-[1px] p-[16px] shadow-[0_1px_2px_0_var(--shadow-soft)] transition hover:shadow-[0_4px_6px_-1px_var(--shadow-medium),0_2px_4px_-2px_var(--shadow-medium)]"
+            class="bg-card mb-[10px] rounded-[14px] border-[1px] p-[16px] transition"
             :class="
               selected?.kind === place.kind && selected?.id === place.id
                 ? 'line-selected ring-[1px] ring-[color:var(--line-selected)]'
-                : 'line-primary'
+                : 'line-primary hover:border-[color:var(--line-control)]'
             "
           >
             <button
@@ -360,72 +348,90 @@ watch(
               "
               @click="emit('select', place)"
             >
-              <span class="flex items-start justify-between gap-[8px]">
-                <span class="text-[16px]/[24px] font-[700] leading-[24px]">
-                  {{ place.name }}
+              <span class="flex items-start justify-between gap-[12px]">
+                <span class="min-w-[0px]">
+                  <span
+                    class="flex items-center gap-[4px] text-[16px]/[24px] font-[700]"
+                  >
+                    <span
+                      v-if="place.kind === 'food'"
+                      aria-hidden="true"
+                      class="material-symbols-rounded text-food-outline shrink-0 text-[18px]"
+                    >
+                      location_on
+                    </span>
+                    {{ place.name }}
+                  </span>
+                  <span
+                    v-if="place.kind === 'parking'"
+                    class="text-secondary mt-[2px] block text-[12px] tabular-nums"
+                  >
+                    {{ place.distance }} m
+                    <template v-if="place.drivingMinutes != null">
+                      · 開車約 {{ place.drivingMinutes }} 分鐘
+                    </template>
+                  </span>
                 </span>
                 <span
                   v-if="place.kind === 'parking'"
-                  class="flex shrink-0 flex-col items-end gap-[6px]"
+                  class="shrink-0 text-right"
                 >
                   <span
-                    class="shrink-0 rounded-[6px] px-[8px] py-[4px] text-[12px]/[16px] font-[700]"
+                    v-if="place.spaces !== null"
+                    class="block text-[24px]/[28px] font-[700] tabular-nums"
                     :class="
-                      place.spaces === null
-                        ? 'bg-primary text-secondary'
-                        : place.spaces === 0
-                          ? 'bg-full text-white'
-                          : place.spaces <= 5
-                            ? 'bg-few text-few-text'
-                            : 'bg-available text-forest'
+                      place.spaces === 0
+                        ? 'text-[color:var(--status-full)]'
+                        : place.spaces <= 5
+                          ? 'text-few-text'
+                          : 'text-forest'
                     "
                   >
+                    {{ place.spaces === 0 ? '滿' : place.spaces }}
+                  </span>
+                  <span class="text-secondary block text-[12px]">
                     {{
                       place.spaces === null
                         ? '車位未提供'
                         : place.spaces === 0
                           ? '已客滿'
-                          : `剩餘車位：${place.spaces}`
+                          : '剩餘車位'
                     }}
-                  </span>
-                  <span
-                    v-if="place.drivingMinutes != null"
-                    class="text-forest text-[12px] font-[500]"
-                  >
-                    約 {{ place.drivingMinutes }} 分鐘
                   </span>
                 </span>
               </span>
               <span
-                class="text-secondary mt-[8px] block text-[14px] leading-[24px]"
+                class="text-secondary mt-[8px] block text-[14px] leading-[22px]"
               >
-                <template v-if="place.kind === 'food'">
-                  {{ place.address }}
-                  <span
-                    v-for="credit in place.attributions"
-                    :key="credit.provider"
-                    class="mt-[4px] block text-[12px]"
-                  >
-                    資料提供：{{ credit.provider }}
-                  </span>
-                </template>
-                <template v-else>
-                  {{ place.address }}
-                  <br />
-                  {{ place.distance }} m
-                  <br />
-                  {{ place.price }}
-                </template>
+                {{ place.address }}
+              </span>
+              <span
+                v-if="place.kind === 'food'"
+                class="text-secondary mt-[4px] block text-[12px]"
+              >
+                <span
+                  v-for="credit in place.attributions"
+                  :key="credit.provider"
+                  class="block"
+                >
+                  資料提供：{{ credit.provider }}
+                </span>
+              </span>
+              <span
+                v-else-if="place.price"
+                class="text-secondary line-primary mt-[10px] block border-t-[1px] pt-[10px] text-[12px] leading-[20px]"
+              >
+                {{ place.price }}
               </span>
             </button>
-            <div class="mt-[12px] flex flex-wrap justify-end gap-[8px]">
+            <div class="mt-[12px] flex items-center justify-end gap-[4px]">
               <Toggle
                 v-if="place.kind === 'parking'"
                 :model-value="
                   favoriteKeys?.includes(`${place.kind}-${place.id}`) ?? false
                 "
                 :aria-label="`${favoriteKeys?.includes(`${place.kind}-${place.id}`) ? '取消收藏' : '收藏'}${place.name}`"
-                class="bg-primary text-forest rounded-[6px] px-[10px] py-[8px] text-[12px]"
+                class="text-forest rounded-[8px] px-[10px] py-[8px] text-[14px] hover:bg-[color:var(--background-available)] data-[state=on]:bg-[color:var(--background-available)] data-[state=on]:font-[700]"
                 @update:model-value="emit('favorite', place)"
               >
                 {{
@@ -436,13 +442,13 @@ watch(
               </Toggle>
               <button
                 v-if="place.kind === 'parking'"
-                class="bg-primary text-forest rounded-[6px] px-[10px] py-[8px] text-[12px]"
+                class="text-forest rounded-[8px] px-[10px] py-[8px] text-[14px] hover:bg-[color:var(--background-available)]"
                 @click="emit('recordParking', place)"
               >
                 記錄車位
               </button>
               <button
-                class="bg-primary inline-flex items-center gap-[6px] rounded-[6px] px-[12px] py-[8px] text-[12px]/[16px] font-[500] hover:bg-[color:var(--brand-secondary)]"
+                class="bg-brand-primary text-inverse ml-[4px] inline-flex items-center gap-[6px] rounded-[8px] px-[14px] py-[8px] text-[14px] font-[500] hover:bg-[color:var(--brand-tertiary)]"
                 :aria-label="`導航前往${place.name}`"
                 @click="emit('navigate', place)"
               >
@@ -480,7 +486,7 @@ watch(
 ## 主要行為
 
 - 搜尋候選只顯示店名與地址，不顯示距離或時間，也不查詢候選的行車時間。
-- 停車場剩餘車位下方顯示從目前位置出發的預估開車分鐘；缺少定位、查無路線或時間尚未取得時省略。
+- 停車場名稱下方顯示距離與從目前位置出發的預估開車分鐘，右側以大數字顯示剩餘車位，5 位以下改用琥珀色；缺少定位、查無路線或時間尚未取得時省略分鐘。
 - 點擊開始導航向父頁面回報 navigate，以開啟 Google Maps 開車導航。
 - 自動擴大時以 radar 圖示及「正在調整搜尋範圍…」顯示狀態，完成後顯示目前範圍；期間停用搜尋避免重複請求。
 - personal 與 parking-controls slot 由父頁面提供紀錄與篩選介面；卡片回報收藏、取消收藏與記錄車位事件。
@@ -500,6 +506,7 @@ watch(
 - 手機版整個清單欄可捲動，操作區不固定占用結果高度；桌面保留清單獨立捲動。
 - 處理載入、未設定 key、空清單及 nullable 選取狀態，不直接呼叫 API。
 - 尺寸與效果使用 tag 上明確數值 Tailwind class；顏色使用 variables.scss 的普通 class，色值集中 theme-color.scss。
+- 分頁與收藏的選取狀態使用 Reka data-state 搭配 Tailwind arbitrary value class 引用主題變數；目的地用陶土橘，找車位與主要按鈕用森林綠。
 - 文字最低 12px，依 Tailwind v3 字級採用 12、14、16、18、20、24px 等級距，保留明確 px 寫法。
 - 全域必要樣式位於 main.scss；頁面專屬型別位於 views/explore/types。
 </spec>

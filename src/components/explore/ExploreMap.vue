@@ -29,7 +29,7 @@ const { markers, mapError, ready } = useExploreMap(
 <template>
   <section
     aria-label="目的地與附近停車場地圖"
-    class="bg-brand-secondary relative h-[28dvh] min-h-[160px] w-[100%] shrink-0 overflow-hidden md:h-[100%] md:min-h-[0px] md:min-w-[0px] md:flex-1"
+    class="bg-primary relative h-[28dvh] min-h-[160px] w-[100%] shrink-0 overflow-hidden md:h-[100%] md:min-h-[0px] md:min-w-[0px] md:flex-1"
   >
     <div
       ref="host"
@@ -37,7 +37,7 @@ const { markers, mapError, ready } = useExploreMap(
     ></div>
     <div
       v-if="!ready"
-      class="absolute inset-[0px] flex flex-col items-center justify-center gap-[12px] bg-[image:linear-gradient(90deg,var(--background-primary)_2px,transparent_2px),linear-gradient(var(--background-primary)_2px,transparent_2px)] bg-[size:100px_100px] px-[24px] text-center"
+      class="absolute inset-[0px] flex flex-col items-center justify-center gap-[12px] bg-[image:linear-gradient(90deg,var(--line-primary)_1px,transparent_1px),linear-gradient(var(--line-primary)_1px,transparent_1px)] bg-[size:100px_100px] px-[24px] text-center"
     >
       <span
         aria-hidden="true"
@@ -73,13 +73,13 @@ const { markers, mapError, ready } = useExploreMap(
       :to="markerHost"
     >
       <button
-        class="line-inverse flex min-h-[40px] items-center gap-[4px] whitespace-nowrap rounded-[9999px] border-[2px] px-[10px] py-[6px] text-[12px] font-[700] shadow-[0_4px_6px_-1px_var(--shadow-medium)]"
+        class="line-inverse flex min-h-[40px] items-center gap-[4px] whitespace-nowrap rounded-[9999px] border-[2px] px-[10px] py-[6px] text-[12px] font-[700] tabular-nums shadow-[0_4px_6px_-1px_var(--shadow-medium)]"
         :class="[
           place.kind === 'food'
             ? 'bg-brand-secondary text-food-text'
             : place.spaces === 0
               ? 'bg-full text-white'
-              : 'bg-brand-tertiary text-white',
+              : 'bg-brand-primary text-white',
           selected?.id === place.id
             ? 'outline outline-[2px] outline-offset-[2px] outline-[color:var(--line-focus)]'
             : '',
@@ -149,6 +149,7 @@ const { markers, mapError, ready } = useExploreMap(
 
 - 未設定 key 時呈現設定提示；Google 地圖與搜尋需要有效 key。
 - 卸載後清除標記與地圖事件，非同步初始化忽略已卸載元件。
+- 停車場標記為森林綠底白字，目的地標記為陶土橘底白字；載入前顯示紙色格線底。
 - 尺寸、陰影與選取效果使用 tag 上明確數值 Tailwind class；顏色為 variables.scss 的普通 class，色值位於 theme-color.scss。
 - 手機地圖為 28dvh、最小 160px，清單使用剩餘高度；桌面採左右欄。
 - 保留 Google 地圖原有來源標示與控制項；不呼叫 Nearby Search。

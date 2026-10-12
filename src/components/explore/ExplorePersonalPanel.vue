@@ -29,35 +29,32 @@ const tab = shallowRef('');
   <CollapsibleRoot
     :open="Boolean(tab)"
     as="section"
-    class="mt-[12px]"
+    class="line-primary mt-[8px] border-t-[1px] pt-[8px]"
     aria-label="我的地點與停車紀錄"
   >
     <ToggleGroupRoot
       v-model="tab"
       type="single"
-      class="grid grid-cols-3 gap-[6px] text-[12px]"
+      class="ml-[-10px] flex flex-wrap gap-[2px]"
       aria-label="我的地點類別"
     >
       <ToggleGroupItem
         value="favorites"
-        class="rounded-[6px] px-[6px] py-[8px]"
-        :class="tab === 'favorites' ? 'bg-available text-forest' : 'bg-primary'"
+        class="text-secondary rounded-[6px] px-[10px] py-[6px] text-[14px] hover:bg-[color:var(--background-primary)] data-[state=on]:bg-[color:var(--background-available)] data-[state=on]:font-[700] data-[state=on]:text-[color:var(--text-forest)]"
         aria-controls="personal-content"
       >
         收藏
       </ToggleGroupItem>
       <ToggleGroupItem
         value="recent"
-        class="rounded-[6px] px-[6px] py-[8px]"
-        :class="tab === 'recent' ? 'bg-available text-forest' : 'bg-primary'"
+        class="text-secondary rounded-[6px] px-[10px] py-[6px] text-[14px] hover:bg-[color:var(--background-primary)] data-[state=on]:bg-[color:var(--background-available)] data-[state=on]:font-[700] data-[state=on]:text-[color:var(--text-forest)]"
         aria-controls="personal-content"
       >
         最近搜尋
       </ToggleGroupItem>
       <ToggleGroupItem
         value="parked"
-        class="rounded-[6px] px-[6px] py-[8px]"
-        :class="tab === 'parked' ? 'bg-available text-forest' : 'bg-primary'"
+        class="text-secondary rounded-[6px] px-[10px] py-[6px] text-[14px] hover:bg-[color:var(--background-primary)] data-[state=on]:bg-[color:var(--background-available)] data-[state=on]:font-[700] data-[state=on]:text-[color:var(--text-forest)]"
         aria-controls="personal-content"
       >
         停車記錄
@@ -65,7 +62,7 @@ const tab = shallowRef('');
     </ToggleGroupRoot>
     <CollapsibleContent
       id="personal-content"
-      class="bg-primary mt-[8px] max-h-[240px] overflow-y-auto rounded-[8px] p-[10px]"
+      class="bg-primary mt-[8px] max-h-[240px] overflow-y-auto rounded-[10px] p-[12px]"
     >
       <template v-if="tab === 'parked'">
         <template v-if="parked">
