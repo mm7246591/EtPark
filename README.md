@@ -82,7 +82,7 @@ EtPark/
 
 專案使用 Netlify Hosting 與 Functions。連接 GitHub repository 後，由 `netlify.toml` 設定建置指令 `npm run build`、發布目錄 `dist` 及 Function 目錄 `netlify/functions`。
 
-停車資料依縣市取得：台北市、新北市使用市府開放資料，不需金鑰；其餘縣市使用交通部 TDX，需設定 `TDX_CLIENT_ID` 與 `TDX_CLIENT_SECRET`。TDX 有每分鐘呼叫上限，超過時 API 回傳 429，網站會提示稍候約一分鐘再查，不封鎖查詢。
+停車資料依縣市取得：台北市、新北市、新竹市使用市府開放資料，不需金鑰；其餘縣市使用交通部 TDX，需設定 `TDX_CLIENT_ID` 與 `TDX_CLIENT_SECRET`。TDX 有每分鐘呼叫上限，超過時 API 回傳 429，網站會提示稍候約一分鐘再查，不封鎖查詢。
 
 正式環境需在 Netlify 設定相同的環境變數：`VITE_` 變數供建置使用，TDX 變數供 Functions 使用。前端與 Functions 必須一起部署；僅拖曳上傳 `dist` 不會部署停車 API。
 

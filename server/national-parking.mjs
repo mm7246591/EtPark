@@ -138,6 +138,57 @@ const validSpaces = (value) => {
   const number = Number(value);
   return Number.isInteger(number) && number >= 0 ? number : null;
 };
+// 新竹市費率混有機車與充電說明，只取汽車費率並統一「/H」為「/時」。
+const hsinchuFee = (weekdays, holiday) => {
+  const car = (text) =>
+    text
+      ?.match(/汽車[:：]\s*([^，,\r\n]+)/)?.[1]
+      ?.trim()
+      .replace(/\/H(?![a-z])/gi, '/時');
+  const weekday = car(weekdays);
+  const weekend = car(holiday);
+  if (weekday && weekday === weekend) return `汽車：${weekday}`;
+  return (
+    [weekday && `平日汽車：${weekday}`, weekend && `假日汽車：${weekend}`]
+      .filter(Boolean)
+      .join('；') || '依現場公告'
+  );
+};
+const normalizeHsinchu = (rows) => {
+  if (!Array.isArray(rows)) throw new Error('Invalid parking response');
+  return rows.flatMap((item) => {
+    const location = {
+      lat: Number(item.LATITUDE),
+      lng: Number(item.LONGITUDE),
+    };
+    if (
+      !item.PARKNO ||
+      !(Number(item.TOTALQUANTITY) > 0) ||
+      !(location.lat > 0) ||
+      !(location.lng > 0)
+    )
+      return [];
+    // 更新時間未帶時區，依來源為台灣時間解析，避免部署在 UTC 主機時誤判過期。
+    const time = String(item.UPDATETIME ?? '');
+    const updated = Date.parse(
+      /(?:Z|[+-]\d{2}:?\d{2})$/i.test(time) ? time : `${time}+08:00`
+    );
+    const fresh =
+      Number.isFinite(updated) && Math.abs(Date.now() - updated) < 900000;
+    return [
+      {
+        kind: 'parking',
+        id: item.PARKNO,
+        name: item.PARKINGNAME || item.PARKNO,
+        address: item.ADDRESS || '',
+        location,
+        distance: 0,
+        price: hsinchuFee(item.WEEKDAYS, item.HOLIDAY),
+        spaces: fresh ? validSpaces(item.FREEQUANTITY) : null,
+      },
+    ];
+  });
+};
 const normalizeTDX = (description, available) => {
   const byId = new Map(available.map((item) => [item.CarParkID, item]));
   return description.flatMap((item) => {
@@ -182,8 +233,9 @@ const getCityParking = async (city, env) => {
   let source = '交通部 TDX';
   if (city === 'Taipei') source = '台北市停車管理工程處';
   if (city === 'NewTaipei') source = '新北市政府交通局';
+  if (city === 'Hsinchu') source = '新竹市政府交通處';
   if (
-    !['Taipei', 'NewTaipei'].includes(city) &&
+    !['Taipei', 'NewTaipei', 'Hsinchu'].includes(city) &&
     (!env.TDX_CLIENT_ID || !env.TDX_CLIENT_SECRET)
   ) {
     return {
@@ -262,6 +314,11 @@ const getCityParking = async (city, env) => {
           },
         ];
       });
+    } else if (city === 'Hsinchu') {
+      // TDX 新竹市沒有即時車位且停車場較少，改用市府開放資料。
+      lots = normalizeHsinchu(
+        await fetchJSON('https://hispark.hccg.gov.tw/OpenData/GetParkInfo')
+      );
     } else {
       const bearer = await accessToken(env);
       const options = { headers: { Authorization: `Bearer ${bearer}` } };
@@ -372,4 +429,10 @@ const handleNationalParking = async (request, response, env = process.env) => {
     response.end(JSON.stringify({ message: 'Parking source unavailable' }));
   }
 };
-export { cities, normalizeTDX, getCityParking, handleNationalParking };
+export {
+  cities,
+  normalizeTDX,
+  normalizeHsinchu,
+  getCityParking,
+  handleNationalParking,
+};

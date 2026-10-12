@@ -1,6 +1,7 @@
 import { expect, it } from 'vitest';
 import {
   normalizeTDX,
+  normalizeHsinchu,
   getCityParking,
   handleNationalParking,
 } from './national-parking.mjs';
@@ -140,6 +141,84 @@ it('TDX 每分鐘上限回傳 429 與重試秒數，不需要本機用量保護�
     expect(status).toBe(429);
     expect(headers['Retry-After']).toBe('60');
     expect(calls).toBeGreaterThan(0);
+  } finally {
+    globalThis.fetch = original;
+  }
+});
+
+it('新竹市使用市府資料：只取汽車費率、排除機車場，台灣時間判斷是否過期', () => {
+  const taipeiTime = (offset) =>
+    new Date(Date.now() + 8 * 3600000 - offset).toISOString().replace('Z', '');
+  const lots = normalizeHsinchu([
+    {
+      PARKNO: '004',
+      PARKINGNAME: '府後地下停車場',
+      ADDRESS: '新竹市北區府後街42號',
+      WEEKDAYS: '汽車：20元/H，機車：20元/次',
+      HOLIDAY: '汽車：20元/H\r\n  充電設備資訊：AC交流慢充',
+      FREEQUANTITY: 33,
+      TOTALQUANTITY: 287,
+      LONGITUDE: '120.969783',
+      LATITUDE: '24.80726',
+      UPDATETIME: taipeiTime(60000),
+    },
+    {
+      PARKNO: '020',
+      PARKINGNAME: '遠東巨城購物中心停車場',
+      WEEKDAYS: '汽車：30元/H，機車：免費',
+      HOLIDAY: '汽車：60元/H，機車：免費',
+      FREEQUANTITY: 1306,
+      TOTALQUANTITY: 3000,
+      LONGITUDE: '120.974726',
+      LATITUDE: '24.809487',
+      UPDATETIME: taipeiTime(3600000),
+    },
+    {
+      PARKNO: 'M1',
+      PARKINGNAME: '機車停車場',
+      TOTALQUANTITY: 0,
+      LONGITUDE: '120.97',
+      LATITUDE: '24.8',
+    },
+  ]);
+  expect(lots.map((lot) => lot.id)).toEqual(['004', '020']);
+  expect(lots[0]).toMatchObject({
+    price: '汽車：20元/時',
+    spaces: 33,
+    location: { lat: 24.80726, lng: 120.969783 },
+  });
+  expect(lots[1]).toMatchObject({
+    price: '平日汽車：30元/時；假日汽車：60元/時',
+    spaces: null,
+  });
+});
+
+it('新竹市不需要 TDX key 即可取得停車資料', async () => {
+  const original = globalThis.fetch;
+  const urls = [];
+  globalThis.fetch = async (url) => {
+    urls.push(String(url));
+    return new Response(
+      JSON.stringify([
+        {
+          PARKNO: '029',
+          PARKINGNAME: '研發二路立體停車場',
+          WEEKDAYS: '汽車：30元/H',
+          HOLIDAY: '汽車：30元/H',
+          FREEQUANTITY: 146,
+          TOTALQUANTITY: 429,
+          LONGITUDE: '121.001092',
+          LATITUDE: '24.7774165',
+          UPDATETIME: new Date().toISOString(),
+        },
+      ])
+    );
+  };
+  try {
+    const result = await getCityParking('Hsinchu', {});
+    expect(result.source).toBe('新竹市政府交通處');
+    expect(result.lots[0]).toMatchObject({ id: '029', spaces: 146 });
+    expect(urls.every((url) => url.includes('hispark.hccg.gov.tw'))).toBe(true);
   } finally {
     globalThis.fetch = original;
   }

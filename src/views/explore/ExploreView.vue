@@ -201,7 +201,7 @@ const navigateTo = (place: Parameters<typeof select>[0]) => {
 - 色值定義於 `theme-color.scss`；`variables.scss` 只逐一宣告 `text-*`、`bg-*`、`line-*` 等顏色 class，不使用 Tailwind 指令或迴圈。
 - 陰影、格線、hover 與選取效果直接寫在 tag 的 Tailwind class，涉及色值時引用主題 CSS 變數。
 - `main.scss` 只保留 body、鍵盤 focus 等必要全域樣式；必要且 Tailwind 不適合表達的元件樣式才使用 scoped。
-- 地點使用 Google 搜尋；搜尋開放台灣，停車場位置、費率與車位依縣市使用市府或 TDX 資料，預設 1 公里，沒有可確認的空位時自動擴大至最多 3 公里，距離為目的地到停車場的直線距離；只查所在縣市。
+- 地點使用 Google 搜尋；搜尋開放台灣，停車場位置、費率與車位依縣市使用市府或 TDX 資料（雙北與新竹市用市府資料，其餘縣市用 TDX），預設 1 公里，沒有可確認的空位時自動擴大至最多 3 公里，距離為目的地到停車場的直線距離；只查所在縣市。
 - 收到 Google 的明確配額錯誤時顯示置中 dialog，阻擋後續 Google／停車 API；關閉 dialog 不解除配額封鎖。
 - 停車 API 回傳 429（TDX 每分鐘呼叫上限）時只提示稍候約一分鐘，不封鎖後續查詢。
 - 網路、逾時與其他服務異常依原因顯示 dialog，恢復後可重試；不在網站預先檢查或計數 API 用量。
