@@ -43,16 +43,58 @@ const spacesBadge = (spaces: number | null) => {
   };
 };
 const results = shallowRef<HTMLElement | null>(null);
+const sheet = shallowRef<HTMLElement | null>(null);
 // 手機抽屜是否展開；桌面面板一律顯示清單，不受影響。
 const expanded = shallowRef(true);
 // 還沒選目的地時不能收合，維持顯示搜尋提示。
 const collapsed = computed(() => !expanded.value && props.foodCount > 0);
+// 收合動畫進行中：清單先留著跟抽屜一起縮小，動畫結束才隱藏。
+const collapsing = shallowRef(false);
+// 開合以高度動畫過渡：收合後是內容高度（auto），CSS transition 無法補間，改量測前後高度用 Web Animations。
+// 動畫中以負 margin-top 抵銷高度變化，抽屜疊在地圖上、地圖尺寸不變，避免地圖每格重繪造成閃爍；
+// 地圖只在收合開始或展開結束時調整一次尺寸。
+const setExpanded = async (value: boolean) => {
+  const el = sheet.value;
+  const from = el?.offsetHeight ?? 0;
+  el?.getAnimations().forEach((animation) => animation.cancel());
+  expanded.value = value;
+  collapsing.value = collapsed.value;
+  await nextTick();
+  const panel = el?.querySelector<HTMLElement>('#results-panel');
+  const to =
+    (el?.offsetHeight ?? 0) -
+    (collapsing.value ? (panel?.offsetHeight ?? 0) : 0);
+  if (
+    !el ||
+    from === to ||
+    matchMedia('(prefers-reduced-motion: reduce)').matches
+  ) {
+    collapsing.value = false;
+    return;
+  }
+  const base = Math.min(from, to);
+  const animation = el.animate(
+    [
+      { height: `${from}px`, marginTop: `${base - from}px` },
+      { height: `${to}px`, marginTop: `${base - to}px` },
+    ],
+    { duration: 250, easing: 'cubic-bezier(0.2, 0, 0, 1)', fill: 'forwards' }
+  );
+  try {
+    await animation.finished;
+  } catch {
+    // 動畫中又點了一次，由新的開合接手。
+    return;
+  }
+  collapsing.value = false;
+  await nextTick();
+  animation.cancel();
+};
 // 選取改變（含點地圖標記）時展開抽屜，並把對應卡片（含展開的操作列）捲進清單的可見範圍；切換分頁不改變開合。
 watch(
   () => props.selected,
   async () => {
-    expanded.value = true;
-    await nextTick();
+    await setExpanded(true);
     results.value
       ?.querySelector('[aria-pressed="true"]')
       ?.closest('li')
@@ -64,6 +106,7 @@ watch(
 <template>
   <!-- 手機為底部抽屜；桌面為左側浮動面板的下半部，與搜尋列共用 ExploreView 的面板底板。 -->
   <section
+    ref="sheet"
     aria-label="搜尋結果"
     class="bg-card relative z-[10] flex max-h-[56dvh] min-h-[0px] min-w-[0px] flex-col rounded-t-[24px] shadow-[0_-8px_30px_var(--shadow-medium)] [grid-area:sheet] md:mx-[16px] md:mb-[36px] md:max-h-none md:rounded-[24px] md:rounded-t-[0px] md:shadow-none"
     :class="foodCount && !collapsed ? 'max-md:h-[56dvh]' : ''"
@@ -75,7 +118,7 @@ watch(
       :aria-expanded="!collapsed"
       aria-controls="results-panel"
       :disabled="!foodCount"
-      @click="expanded = collapsed"
+      @click="setExpanded(collapsed)"
     >
       <span
         aria-hidden="true"
@@ -158,7 +201,7 @@ watch(
         id="results-panel"
         tabindex="0"
         class="min-h-[0px] flex-1 overflow-y-auto px-[16px] pb-[max(16px,env(safe-area-inset-bottom))] pt-[8px]"
-        :class="collapsed ? 'max-md:hidden' : ''"
+        :class="collapsed && !collapsing ? 'max-md:hidden' : ''"
       >
         <p
           v-if="noticeMessage"
@@ -354,6 +397,7 @@ watch(
 - 處理載入、空清單及 nullable 選取狀態，不直接呼叫 API；查詢額度用盡時不顯示提示文字，由對話框說明。
 - 手機抽屜在選定目的地後展開時固定 56dvh、收合時兩個分頁同高，切換分頁高度不變；尚未選擇目的地時依內容高度，上限 56dvh；清單區可捲動並保留 iPhone 安全區域；收合時以 max-md:hidden 隱藏清單區，桌面填滿面板剩餘高度且不受開合狀態影響。
 - 把手為整列寬、24px 高的按鈕（間距與設計稿相同），帶 aria-expanded、aria-controls 與「收合清單／展開清單」aria-label；只支援點擊，不支援拖曳調整高度。
+- 開合以 250ms 高度動畫過渡（收合後為內容高度，改量測前後高度以 Web Animations 補間）；動畫中以負 margin-top 抵銷高度變化，抽屜疊在地圖上、地圖尺寸不變，避免地圖逐格重繪閃爍，地圖只在收合開始或展開結束時調整一次尺寸；收合時清單跟著縮小，結束才隱藏；減少動態效果偏好時直接切換。
 - 分頁與收藏的選取狀態使用 Reka data-state 搭配 Tailwind arbitrary value class 引用主題變數：選中分頁為白底藍染字，已收藏、選取外框與主要按鈕用藍染。
 - 圖示字型 class 在 main.scss 設了 display，只在手機隱藏的圖示用 `max-md:!hidden` 覆蓋。
 - 使用 Google Material Symbols Rounded，裝飾圖示設為 aria-hidden，操作保留文字或 aria-label。
