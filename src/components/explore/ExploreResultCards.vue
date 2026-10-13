@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { shallowRef, watch, nextTick } from 'vue';
+import { computed, shallowRef, watch, nextTick } from 'vue';
 import { TabsList, TabsTrigger, TabsContent, Toggle } from 'reka-ui';
 import type {
   Place,
@@ -43,10 +43,15 @@ const spacesBadge = (spaces: number | null) => {
   };
 };
 const results = shallowRef<HTMLElement | null>(null);
-// 選取改變（含點地圖標記）時，把對應卡片（含展開的操作列）捲進清單的可見範圍。
+// 手機抽屜是否展開；桌面面板一律顯示清單，不受影響。
+const expanded = shallowRef(true);
+// 還沒選目的地時不能收合，維持顯示搜尋提示。
+const collapsed = computed(() => !expanded.value && props.foodCount > 0);
+// 選取改變（含點地圖標記）時展開抽屜，並把對應卡片（含展開的操作列）捲進清單的可見範圍；切換分頁不改變開合。
 watch(
   () => props.selected,
   async () => {
+    expanded.value = true;
     await nextTick();
     results.value
       ?.querySelector('[aria-pressed="true"]')
@@ -61,12 +66,28 @@ watch(
   <section
     aria-label="搜尋結果"
     class="bg-card relative z-[10] flex max-h-[56dvh] min-h-[0px] min-w-[0px] flex-col rounded-t-[24px] shadow-[0_-8px_30px_var(--shadow-medium)] [grid-area:sheet] md:mx-[16px] md:mb-[36px] md:max-h-none md:rounded-[24px] md:rounded-t-[0px] md:shadow-none"
+    :class="foodCount && !collapsed ? 'max-md:h-[56dvh]' : ''"
   >
-    <span
-      aria-hidden="true"
-      class="mx-auto mb-[6px] mt-[10px] h-[4px] w-[40px] shrink-0 rounded-[9999px] bg-[color:var(--line-control)] md:hidden"
-    ></span>
-    <div class="shrink-0 px-[16px] md:px-[20px]">
+    <button
+      type="button"
+      class="flex h-[24px] w-[100%] shrink-0 items-center justify-center rounded-t-[24px] md:hidden"
+      :aria-label="collapsed ? '展開清單' : '收合清單'"
+      :aria-expanded="!collapsed"
+      aria-controls="results-panel"
+      :disabled="!foodCount"
+      @click="expanded = collapsed"
+    >
+      <span
+        aria-hidden="true"
+        class="h-[4px] w-[40px] rounded-[9999px] bg-[color:var(--line-control)]"
+      ></span>
+    </button>
+    <div
+      class="shrink-0 px-[16px] md:px-[20px]"
+      :class="
+        collapsed ? 'max-md:pb-[max(12px,env(safe-area-inset-bottom))]' : ''
+      "
+    >
       <TabsList
         class="bg-primary grid grid-cols-2 gap-[4px] rounded-[14px] p-[4px]"
         aria-label="搜尋類別"
@@ -110,6 +131,24 @@ watch(
         </p>
         <slot name="parking-controls"></slot>
       </div>
+      <!-- 目的地分頁收合時改顯示目的地名稱與地址，與停車場的搜尋範圍列同高，兩個分頁收合高度一致。 -->
+      <p
+        v-if="activeKind === 'food' && collapsed && places[0]"
+        class="mt-[8px] flex min-h-[32px] items-center gap-[4px] md:hidden"
+      >
+        <span
+          aria-hidden="true"
+          class="material-symbols-rounded text-food-outline shrink-0 text-[18px]"
+        >
+          location_on
+        </span>
+        <span class="min-w-[0px] truncate text-[14px] font-[500]">
+          {{ places[0].name }}
+          <span class="text-secondary ml-[4px] text-[12px] font-[400]">
+            {{ places[0].address }}
+          </span>
+        </span>
+      </p>
     </div>
     <TabsContent
       :value="activeKind"
@@ -119,6 +158,7 @@ watch(
         id="results-panel"
         tabindex="0"
         class="min-h-[0px] flex-1 overflow-y-auto px-[16px] pb-[max(16px,env(safe-area-inset-bottom))] pt-[8px]"
+        :class="collapsed ? 'max-md:hidden' : ''"
       >
         <p
           v-if="noticeMessage"
@@ -285,7 +325,7 @@ watch(
 ## 元件定位
 
 - 目的地／停車場分頁與直向結果清單；子元件位於 src/components/explore，以 grid-area:sheet 放進 ExploreView 的頁面格線。
-- 手機為地圖下方的圓角底部抽屜（含裝飾用把手）；桌面為左側浮動面板的下半部，接在搜尋列下方。版面依設計稿配置 3（浮動卡片）。
+- 手機為地圖下方的圓角底部抽屜，頂部把手可點擊開合；桌面為左側浮動面板的下半部，接在搜尋列下方。版面依設計稿配置 3（浮動卡片）。
 
 ## 公開介面
 
@@ -297,12 +337,14 @@ watch(
 
 ## 主要行為
 
+- 手機點擊頂部把手開合抽屜，展開時顯示清單；收合時停車場分頁只留分頁與「搜尋範圍 · 排序」列，目的地分頁改顯示目的地名稱與地址列，兩者同高，讓出地圖空間。
+- 尚未選擇目的地時把手停用、點擊無反應，維持顯示搜尋提示；搜尋或選取改變（含點地圖標記）時自動展開；切換分頁維持原本的開合狀態。
 - 分頁為兩欄分段控制，支援方向鍵、Home 與 End；切換結果由父頁面 TabsRoot 回報。
 - 停車場分頁在分頁下方顯示「搜尋範圍 N 公里 · M 處 · 實際費率以現場公告為準」與排序，寬度不足時費率提醒整段換行；沒有結果時不顯示費率提醒，自動擴大範圍時改為「正在調整搜尋範圍…」。
 - 停車場卡片第一行為名稱與車位標籤：一般「N 位」、10 位以下改用琥珀色「剩 N 位」、滿位「已客滿」、未提供「車位未提供」；下方為距離與從目前位置出發的預估開車分鐘，缺少定位、查無路線或時間尚未取得時省略分鐘。
 - 計費方式以無底色的藍染深色文字「計費方式：」顯示，與上方距離文字左側對齊，依原始單位顯示小型車臨停費率（60/hr、50/30min、50/次、首hr 20 · 之後 40/hr），平日／假日與時段分開列出，超過兩段時同單位顯示區間（不同單位列最常見費率）並標示「多段費率」；上限依原文標示當日、N 小時內、夜間、時段或單次，附前 N 分鐘免費；機車費率多數停車場未提供，不顯示；月租、季租等長期費用不顯示，無法判讀時保留原文。
 - 目的地卡片顯示名稱、地址與資料來源。
-- 停車場與目的地名稱（卡片標題）使用 16px、字重 500。
+- 停車場與目的地名稱（卡片標題與收合時的目的地列）使用 16px／14px、字重 500。
 - 點擊卡片選取；只有選取中的卡片展開操作列：停車場為收藏、記錄車位與開始導航，目的地只有開始導航；桌面另顯示停車場地址，開始導航前加導航圖示。
 - 選取改變時（含點地圖標記），把對應卡片捲進清單可見範圍；選取中的卡片以藍染外框標示。
 - 收藏與記錄車位保留含停車場名稱的 aria-label；收藏僅供停車場，已滿位不列入清單。
@@ -310,7 +352,8 @@ watch(
 ## 狀態與限制
 
 - 處理載入、空清單及 nullable 選取狀態，不直接呼叫 API；查詢額度用盡時不顯示提示文字，由對話框說明。
-- 手機抽屜高度依內容、上限 56dvh，清單區可捲動並保留 iPhone 安全區域；桌面填滿面板剩餘高度。
+- 手機抽屜在選定目的地後展開時固定 56dvh、收合時兩個分頁同高，切換分頁高度不變；尚未選擇目的地時依內容高度，上限 56dvh；清單區可捲動並保留 iPhone 安全區域；收合時以 max-md:hidden 隱藏清單區，桌面填滿面板剩餘高度且不受開合狀態影響。
+- 把手為整列寬、24px 高的按鈕（間距與設計稿相同），帶 aria-expanded、aria-controls 與「收合清單／展開清單」aria-label；只支援點擊，不支援拖曳調整高度。
 - 分頁與收藏的選取狀態使用 Reka data-state 搭配 Tailwind arbitrary value class 引用主題變數：選中分頁為白底藍染字，已收藏、選取外框與主要按鈕用藍染。
 - 圖示字型 class 在 main.scss 設了 display，只在手機隱藏的圖示用 `max-md:!hidden` 覆蓋。
 - 使用 Google Material Symbols Rounded，裝飾圖示設為 aria-hidden，操作保留文字或 aria-label。

@@ -47,6 +47,7 @@ it('停車場卡片顯示車位、距離分鐘、計費方式，選取後才展�
   expect(html).toContain('計費方式：30/hr');
   expect(html).not.toContain('20/次');
   expect(html).not.toContain('開始導航');
+  expect(html).toContain('aria-label="收合清單"');
   const selected = await render({ selected: props.places[0] });
   expect(selected).toContain('開始導航');
   expect(selected).toContain('記錄車位');
@@ -64,4 +65,13 @@ it('查詢額度用盡時清單區不顯示提示文字，只由對話框說明'
   const html = await render({ blocked: true, places: [] });
   expect(html).not.toContain('搜尋並選擇目的地');
   expect(html).not.toContain('資料載入中');
+});
+
+it('尚未選擇目的地時清單把手停用，不能收合', async () => {
+  const handle = (html: string) =>
+    html.match(/<button[^>]*aria-controls="results-panel"[^>]*>/)?.[0] ?? '';
+  expect(handle(await render({ foodCount: 0, places: [] }))).toContain(
+    'disabled'
+  );
+  expect(handle(await render())).not.toContain('disabled');
 });
