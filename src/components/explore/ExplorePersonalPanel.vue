@@ -49,13 +49,11 @@ const items = [
         :key="item.value"
         :value="item.value"
         class="bg-card text-primary flex min-h-[36px] shrink-0 items-center rounded-[9999px] px-[12px] text-[12px] shadow-[0_3px_10px_var(--shadow-medium)] hover:bg-[color:var(--background-primary)] data-[state=on]:bg-[color:var(--background-available)] data-[state=on]:font-[500] data-[state=on]:text-[color:var(--text-brand)] md:text-[14px] md:shadow-none"
-        aria-controls="personal-content"
       >
         {{ item.label }}
       </ToggleGroupItem>
     </ToggleGroupRoot>
     <CollapsibleContent
-      id="personal-content"
       class="bg-card line-primary absolute left-[12px] right-[12px] top-[100%] max-h-[50dvh] overflow-y-auto rounded-[20px] border-[1px] p-[16px] shadow-[0_8px_24px_var(--shadow-medium)] md:left-auto md:right-[20px] md:top-[calc(100%-12px)] md:w-[360px]"
     >
       <template v-if="tab === 'parked'">
