@@ -39,7 +39,6 @@ const props = {
     },
   ],
   foodCount: 1,
-  parkingCount: 1,
 };
 
 it('搜尋候選只呈現店名地址，停車場保留分鐘與開始導航', async () => {

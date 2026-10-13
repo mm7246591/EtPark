@@ -33,7 +33,6 @@ const props = defineProps<{
   mapsConfigured: boolean;
   places: Place[];
   foodCount: number;
-  parkingCount: number;
   favoriteKeys?: string[];
   radius?: number;
   expanding?: boolean;
@@ -230,27 +229,15 @@ watch(
       >
         <TabsTrigger
           value="food"
-          class="text-secondary mb-[-1px] flex flex-1 items-center justify-center gap-[6px] border-b-[2px] border-transparent p-[12px] text-[14px]/[20px] font-[700] tabular-nums transition hover:text-[color:var(--text-primary)] data-[state=active]:border-[color:var(--line-food)] data-[state=active]:text-[color:var(--text-food-outline)]"
+          class="text-secondary mb-[-1px] flex flex-1 items-center justify-center border-b-[2px] border-transparent p-[12px] text-[14px]/[20px] font-[700] transition hover:text-[color:var(--text-primary)] data-[state=active]:border-[color:var(--line-food)] data-[state=active]:text-[color:var(--text-food-outline)]"
         >
-          <span
-            aria-hidden="true"
-            class="material-symbols-rounded shrink-0 text-[18px]"
-          >
-            location_on
-          </span>
-          <span>目的地 ({{ foodCount }})</span>
+          目的地
         </TabsTrigger>
         <TabsTrigger
           value="parking"
-          class="text-secondary mb-[-1px] flex flex-1 items-center justify-center gap-[6px] border-b-[2px] border-transparent p-[12px] text-[14px]/[20px] font-[700] tabular-nums transition hover:text-[color:var(--text-primary)] data-[state=active]:border-[color:var(--line-parking)] data-[state=active]:text-[color:var(--text-forest)]"
+          class="text-secondary mb-[-1px] flex flex-1 items-center justify-center border-b-[2px] border-transparent p-[12px] text-[14px]/[20px] font-[700] transition hover:text-[color:var(--text-primary)] data-[state=active]:border-[color:var(--line-parking)] data-[state=active]:text-[color:var(--text-forest)]"
         >
-          <span
-            aria-hidden="true"
-            class="material-symbols-rounded shrink-0 text-[18px]"
-          >
-            local_parking
-          </span>
-          <span>找車位 ({{ parkingCount }})</span>
+          停車場
         </TabsTrigger>
       </TabsList>
       <TabsContent
@@ -477,7 +464,7 @@ watch(
 
 ## 公開介面
 
-- Props：searching、searchMessage、noticeMessage、source、parkingNotice、activeKind、selected（可為 null）、places、foodCount、parkingCount、suggestions、loading、blocked、blockedMessage、mapsConfigured、favoriteKeys、radius、expanding。
+- Props：searching、searchMessage、noticeMessage、source、parkingNotice、activeKind、selected（可為 null）、places、foodCount、suggestions、loading、blocked、blockedMessage、mapsConfigured、favoriteKeys、radius、expanding。
 - v-model：無公開 v-model，query 為內部輸入狀態。
 - Emits：inputSearch、search、chooseSuggestion、refresh、select、switchKind、navigate、locate、favorite、recordParking。
 - 主要依賴：views/explore/types/place、Vue、Reka UI Combobox／Tabs／Toggle、Tailwind CSS v3。
@@ -505,7 +492,7 @@ watch(
 - 手機版整個清單欄可捲動，操作區不固定占用結果高度；桌面保留清單獨立捲動。
 - 處理載入、未設定 key、空清單及 nullable 選取狀態，不直接呼叫 API。
 - 尺寸與效果使用 tag 上明確數值 Tailwind class；顏色使用 variables.scss 的普通 class，色值集中 theme-color.scss。
-- 分頁與收藏的選取狀態使用 Reka data-state 搭配 Tailwind arbitrary value class 引用主題變數；目的地用陶土橘，找車位與主要按鈕用森林綠。
+- 分頁與收藏的選取狀態使用 Reka data-state 搭配 Tailwind arbitrary value class 引用主題變數；目的地用陶土橘，停車場與主要按鈕用森林綠。
 - 文字最低 12px，依 Tailwind v3 字級採用 12、14、16、18、20、24px 等級距，保留明確 px 寫法。
 - 全域必要樣式位於 main.scss；頁面專屬型別位於 views/explore/types。
 </spec>

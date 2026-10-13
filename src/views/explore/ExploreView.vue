@@ -108,7 +108,6 @@ const navigateTo = (place: Parameters<typeof select>[0]) => {
       :selected="selected"
       :places="places"
       :food-count="restaurants.length"
-      :parking-count="parkingLots.length"
       :radius="radius"
       :expanding="expanding"
       :favorite-keys="favorites.map((item) => `${item.kind}-${item.id}`)"
