@@ -220,6 +220,7 @@ const navigateTo = (place: Parameters<typeof select>[0]) => {
 - 桌面浮動面板的底板與陰影是頁面上的裝飾元素，搜尋列與清單疊在上面；面板底部多留空間，地圖縮放時依浮層尺寸留白，Google 標誌不被遮住。
 - 固定尺寸、間距、圓角、字級與線寬使用 tag 上明確數值的 Tailwind class；比例保留 `%`／視窗單位。
 - 色值定義於 `theme-color.scss`；`variables.scss` 只逐一宣告 `text-*`、`bg-*`、`line-*` 等顏色 class，不使用 Tailwind 指令或迴圈。
+- 深色模式跟隨系統設定（prefers-color-scheme）：`theme-color.scss` 以同名 CSS 變數覆寫為藍染・夜間配色，元件不需另寫深色 class；Google 地圖以 colorScheme 跟隨系統，深色時使用 Cloud Console 地圖樣式的深色版本。
 - 陰影、格線、hover 與選取效果直接寫在 tag 的 Tailwind class，涉及色值時引用主題 CSS 變數。
 - `main.scss` 只保留 body、鍵盤 focus 等必要全域樣式；必要且 Tailwind 不適合表達的元件樣式才使用 scoped。
 - 地點使用 Google 搜尋；搜尋開放台灣，停車場位置、費率與車位依縣市使用市府或 TDX 資料（雙北與新竹市用市府資料，其餘縣市用 TDX），預設 1 公里，沒有可確認的空位時自動擴大至最多 3 公里，距離為目的地到停車場的直線距離；只查所在縣市。

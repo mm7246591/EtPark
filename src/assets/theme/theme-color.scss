@@ -52,3 +52,53 @@
   --shadow-medium: rgb(28 37 48 / 12%);
   --shadow-location: #2f80ed;
 }
+
+// 藍染・夜間：手機或電腦切到深色模式時自動套用。
+// 底色改為深墨藍黑；主色、弁柄與琥珀調亮，按鈕與標記上的字改用深色以維持對比。
+@media (prefers-color-scheme: dark) {
+  :root {
+    // Brand
+    --brand-primary: #7ea7c8;
+    --brand-secondary: #d98a68;
+    --brand-tertiary: #b9d2e6;
+
+    // Text
+    --text-inverse: #11161c;
+    --text-primary: #e9e6df;
+    --text-secondary: #a4adb9;
+    --text-food-text: #1a1410;
+    --text-food-outline: #d98a68;
+    --text-rating: #c9a77a;
+    --text-brand: #7ea7c8;
+    --text-few-text: #e0b060;
+
+    // Line
+    --line-primary: #2b3440;
+    --line-control: #3a4553;
+    --line-food: #d98a68;
+    --line-parking: #7ea7c8;
+    --line-selected: #7ea7c8;
+    --line-food-marker: #d98a68;
+    --line-inverse: #1a2129;
+    --line-focus: #b9d2e6;
+
+    // Background
+    --background-primary: #11161c;
+    --background-card: #1a2129;
+    --background-input: #232b35;
+    --background-food-active: #3a281f;
+    --background-available: #23303d;
+    --background-selected: rgb(126 167 200 / 16%);
+    --background-few: #33291a;
+
+    // Status
+    --status-few: #e0b060;
+
+    // Mask
+    --mask-dialog: rgb(0 0 0 / 60%);
+
+    // Shadow
+    --shadow-soft: rgb(0 0 0 / 20%);
+    --shadow-medium: rgb(0 0 0 / 32%);
+  }
+}

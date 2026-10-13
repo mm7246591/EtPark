@@ -93,6 +93,8 @@ export const useExploreMap = (
         center: { lat: 25.0478, lng: 121.517 },
         zoom: 15,
         mapId: import.meta.env.VITE_GOOGLE_MAPS_MAP_ID || 'DEMO_MAP_ID',
+        // 跟隨系統深淺色，深色時套用 Cloud Console 地圖樣式的深色版本；只在建立地圖時生效。
+        colorScheme: 'FOLLOW_SYSTEM',
         streetViewControl: false,
         mapTypeControl: false,
         fullscreenControl: false,
