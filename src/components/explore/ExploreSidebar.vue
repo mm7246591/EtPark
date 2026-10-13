@@ -109,10 +109,9 @@ watch(
       aria-label="周邊美食與停車場"
     >
       <header
-        class="flex shrink-0 items-baseline justify-between gap-[12px] px-[16px] pb-[10px] pt-[14px] md:px-[20px] md:pb-[12px] md:pt-[20px]"
+        class="shrink-0 px-[16px] pb-[10px] pt-[14px] md:px-[20px] md:pb-[12px] md:pt-[20px]"
       >
         <h1 class="text-forest text-[24px] font-[700]">EtPark</h1>
-        <p class="text-secondary text-[12px]">找到目的地，也找到停車位</p>
       </header>
       <div class="shrink-0 px-[16px] pb-[12px] md:px-[20px]">
         <ComboboxRoot
