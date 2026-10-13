@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { shallowRef, watch } from 'vue';
+import { TabsRoot } from 'reka-ui';
 import ExplorePersonalPanel from '@/components/explore/ExplorePersonalPanel.vue';
 import ParkingControls from '@/components/explore/ParkingControls.vue';
 import ParkingRecordDialog from '@/components/explore/ParkingRecordDialog.vue';
@@ -7,9 +8,11 @@ import ApiUsageDialog from '@/components/explore/ApiUsageDialog.vue';
 import { useApiUsage } from '@/composables/useApiUsage';
 import { usePersonalPlaces } from './composables/usePersonalPlaces';
 import type { SavedPlace } from './types/personal';
-import type { ParkingLot } from './types/place';
+import type { ParkingLot, PlaceKind } from './types/place';
 import { getGoogleMapsNavigationUrl } from './utils/navigation';
-import ExploreSidebar from '../../components/explore/ExploreSidebar.vue';
+import ExploreSearchBar from '../../components/explore/ExploreSearchBar.vue';
+import ExploreMapToolbar from '../../components/explore/ExploreMapToolbar.vue';
+import ExploreResultCards from '../../components/explore/ExploreResultCards.vue';
 import ExploreMap from '../../components/explore/ExploreMap.vue';
 import { useExplore } from './composables/useExplore';
 
@@ -17,14 +20,12 @@ const { blocked, dialogOpen, dialogMessage } = useApiUsage();
 const {
   radius,
   expanding,
-  parkingTotal,
   parkingSort,
   openSaved,
   destination,
   searching,
   searchMessage,
   inputSearch,
-  source,
   parkingNotice,
   restaurants,
   parkingLots,
@@ -90,38 +91,46 @@ const navigateTo = (place: Parameters<typeof select>[0]) => {
 </script>
 
 <template>
-  <main
-    class="flex h-[100dvh] min-h-[0px] flex-col-reverse overflow-hidden md:flex-row"
+  <!-- 地圖鋪底，其餘子元件以 grid-area 浮在地圖上：手機由上而下為搜尋膠囊、操作列、地圖、底部抽屜；桌面左欄為浮動面板（搜尋＋清單），右上為操作列。 -->
+  <!-- TabsRoot 包住整頁，讓清單分頁（ResultCards）與父頁面共用同一組分頁狀態。 -->
+  <TabsRoot
+    :model-value="activeKind"
+    as-child
+    @update:model-value="(value) => switchKind(value as PlaceKind)"
   >
-    <ExploreSidebar
-      :searching="searching"
-      :search-message="searchMessage"
-      :notice-message="message === dialogMessage ? '' : message"
-      :source="source"
-      :parking-notice="parkingNotice"
-      :suggestions="suggestions"
-      :loading="loading || expanding"
-      :blocked="blocked"
-      :maps-configured="mapsConfigured"
-      :active-kind="activeKind"
-      :selected="selected"
-      :places="places"
-      :food-count="restaurants.length"
-      :radius="radius"
-      :expanding="expanding"
-      :favorite-keys="favorites.map((item) => `${item.kind}-${item.id}`)"
-      @input-search="inputSearch"
-      @search="search"
-      @choose-suggestion="chooseSuggestion"
-      @refresh="refresh"
-      @select="select"
-      @switch-kind="switchKind"
-      @navigate="navigateTo"
-      @locate="locate"
-      @favorite="toggleFavorite"
-      @record-parking="recordParking"
+    <main
+      class="relative grid h-[100dvh] min-h-[0px] grid-cols-[minmax(0,1fr)] grid-rows-[auto_auto_minmax(0,1fr)_auto] overflow-hidden [grid-template-areas:'search'_'chips'_'.'_'sheet'] md:grid-cols-[440px_minmax(0,1fr)] md:grid-rows-[auto_minmax(0,1fr)] md:[grid-template-areas:'search_chips'_'sheet_.']"
     >
-      <template #personal>
+      <ExploreMap
+        :restaurants="restaurants"
+        :parking-lots="parkingLots"
+        :selected="selected"
+        :blocked="blocked"
+        @select="select"
+      />
+      <!-- 桌面浮動面板的底板與陰影，搜尋列與清單疊在上面合成一張卡片；底部多留空間讓 Google 標誌不被遮住。 -->
+      <div
+        aria-hidden="true"
+        class="bg-card relative z-[1] hidden rounded-[24px] shadow-[0_12px_40px_var(--shadow-medium)] md:mx-[16px] md:mb-[36px] md:mt-[16px] md:block md:[grid-area:1/1/-1/2]"
+      ></div>
+      <ExploreSearchBar
+        :searching="searching"
+        :search-message="searchMessage"
+        :suggestions="suggestions"
+        :loading="loading || expanding"
+        :blocked="blocked"
+        :maps-configured="mapsConfigured"
+        @input-search="inputSearch"
+        @search="search"
+        @choose-suggestion="chooseSuggestion"
+      />
+      <ExploreMapToolbar
+        :loading="loading || expanding"
+        :blocked="blocked"
+        :food-count="restaurants.length"
+        @locate="locate"
+        @refresh="refresh"
+      >
         <ExplorePersonalPanel
           :favorites="favorites"
           :recent="recent"
@@ -134,36 +143,48 @@ const navigateTo = (place: Parameters<typeof select>[0]) => {
           @edit-parking="editParking"
           @clear-parking="clearParking"
         />
-      </template>
-      <template #parking-controls>
-        <ParkingControls
-          :sort="parkingSort"
-          :disabled="loading || expanding || blocked"
-          :total="parkingTotal"
-          :count="parkingLots.length"
-          @sort="parkingSort = $event"
-        />
-      </template>
-    </ExploreSidebar>
-    <ExploreMap
-      :restaurants="restaurants"
-      :parking-lots="parkingLots"
-      :selected="selected"
-      :blocked="blocked"
-      @select="select"
-    />
-    <ParkingRecordDialog
-      :place="recordPlace"
-      :note="recordNote"
-      @close="recordPlace = null"
-      @save="saveRecord"
-    />
-    <ApiUsageDialog
-      :open="dialogOpen"
-      :message="dialogMessage"
-      @close="dialogOpen = false"
-    />
-  </main>
+      </ExploreMapToolbar>
+      <ExploreResultCards
+        :notice-message="message === dialogMessage ? '' : message"
+        :parking-notice="parkingNotice"
+        :active-kind="activeKind"
+        :selected="selected"
+        :loading="loading || expanding"
+        :blocked="blocked"
+        :places="places"
+        :food-count="restaurants.length"
+        :radius="radius"
+        :expanding="expanding"
+        :favorite-keys="favorites.map((item) => `${item.kind}-${item.id}`)"
+        @select="select"
+        @navigate="navigateTo"
+        @favorite="toggleFavorite"
+        @record-parking="recordParking"
+      >
+        <template
+          v-if="activeKind === 'parking' && restaurants.length"
+          #parking-controls
+        >
+          <ParkingControls
+            :sort="parkingSort"
+            :disabled="loading || expanding || blocked"
+            @sort="parkingSort = $event"
+          />
+        </template>
+      </ExploreResultCards>
+      <ParkingRecordDialog
+        :place="recordPlace"
+        :note="recordNote"
+        @close="recordPlace = null"
+        @save="saveRecord"
+      />
+      <ApiUsageDialog
+        :open="dialogOpen"
+        :message="dialogMessage"
+        @close="dialogOpen = false"
+      />
+    </main>
+  </TabsRoot>
 </template>
 
 <spec lang="md">
@@ -179,7 +200,7 @@ const navigateTo = (place: Parameters<typeof select>[0]) => {
 - Props：無公開 props。
 - v-model：無。
 - Emits：無。
-- 主要依賴：`ExploreSidebar`、`ExploreMap`、`useExplore`、`ExplorePersonalPanel`、`ParkingControls`、`ParkingRecordDialog`、`usePersonalPlaces`、Google Maps / Places 與各縣市停車 API。
+- 主要依賴：`ExploreSearchBar`、`ExploreMapToolbar`、`ExploreResultCards`、`ExploreMap`、`useExplore`、`ExplorePersonalPanel`、`ParkingControls`、`ParkingRecordDialog`、`usePersonalPlaces`、Google Maps / Places 與各縣市停車 API。
 
 ## 主要行為
 
@@ -191,10 +212,12 @@ const navigateTo = (place: Parameters<typeof select>[0]) => {
 - 停車場收藏與最近搜尋保存於瀏覽器，重開地點時重新查詢；停車記錄可保存樓層、區域或車格。
 - 預設搜尋 1 公里；範圍內沒有確定有空位的停車場，自動逐步擴大至 2／3 公里，最多 3 公里；調整狀態會呈現在清單，沿用同一份停車資料及五分鐘時間暫存。
 - 多選排序依勾選先後決定優先順序；勾選剩餘車位時排除未知，全部取消則恢復目的地距離排序；費用只比較可明確推算的一小時費率，條件不明的放在後方。
-- 桌面使用左右欄配置；手機使用上方地圖、下方清單。
+- 版面為全幅地圖加浮動面板：手機上方為搜尋膠囊與可橫向捲動的操作列（目前位置、更新車位、收藏、最近搜尋、停車記錄），下方為分頁與直向清單的底部抽屜；桌面左側為搜尋加清單的浮動面板，右上角為操作列。
 
 ## 狀態與限制
 
+- 頁面以 CSS grid-template-areas 定義 search、chips、sheet 三區，子元件各自以 grid-area 放入；地圖以格線行列編號鋪底（手機第 1～3 列，桌面整頁），浮層以 z-index 疊在上方。
+- 桌面浮動面板的底板與陰影是頁面上的裝飾元素，搜尋列與清單疊在上面；面板底部多留空間，地圖縮放時依浮層尺寸留白，Google 標誌不被遮住。
 - 固定尺寸、間距、圓角、字級與線寬使用 tag 上明確數值的 Tailwind class；比例保留 `%`／視窗單位。
 - 色值定義於 `theme-color.scss`；`variables.scss` 只逐一宣告 `text-*`、`bg-*`、`line-*` 等顏色 class，不使用 Tailwind 指令或迴圈。
 - 陰影、格線、hover 與選取效果直接寫在 tag 的 Tailwind class，涉及色值時引用主題 CSS 變數。

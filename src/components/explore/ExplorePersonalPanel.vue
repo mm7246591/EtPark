@@ -23,50 +23,44 @@ const emit = defineEmits<{
   clearParking: [];
 }>();
 const tab = shallowRef('');
+const items = [
+  { value: 'favorites', label: '收藏' },
+  { value: 'recent', label: '最近搜尋' },
+  { value: 'parked', label: '停車記錄' },
+];
 </script>
 
 <template>
+  <!-- 不設定位：浮動面板以父層 ExploreMapToolbar 外層為基準，不被橫向捲動區裁切。 -->
   <CollapsibleRoot
     :open="Boolean(tab)"
     as="section"
-    class="line-primary mt-[8px] border-t-[1px] pt-[8px]"
+    class="flex shrink-0"
     aria-label="我的地點與停車紀錄"
   >
     <ToggleGroupRoot
       v-model="tab"
       type="single"
-      class="ml-[-10px] flex flex-wrap gap-[2px]"
+      class="flex gap-[6px] md:gap-[4px] md:rounded-[9999px] md:bg-[color:var(--background-card)] md:p-[4px] md:shadow-[0_4px_14px_var(--shadow-medium)]"
       aria-label="我的地點類別"
     >
       <ToggleGroupItem
-        value="favorites"
-        class="text-secondary rounded-[6px] px-[10px] py-[6px] text-[14px] hover:bg-[color:var(--background-primary)] data-[state=on]:bg-[color:var(--background-available)] data-[state=on]:font-[700] data-[state=on]:text-[color:var(--text-forest)]"
+        v-for="item in items"
+        :key="item.value"
+        :value="item.value"
+        class="bg-card text-primary flex min-h-[36px] shrink-0 items-center rounded-[9999px] px-[12px] text-[12px] shadow-[0_3px_10px_var(--shadow-medium)] hover:bg-[color:var(--background-primary)] data-[state=on]:bg-[color:var(--background-available)] data-[state=on]:font-[500] data-[state=on]:text-[color:var(--text-brand)] md:text-[14px] md:shadow-none"
         aria-controls="personal-content"
       >
-        收藏
-      </ToggleGroupItem>
-      <ToggleGroupItem
-        value="recent"
-        class="text-secondary rounded-[6px] px-[10px] py-[6px] text-[14px] hover:bg-[color:var(--background-primary)] data-[state=on]:bg-[color:var(--background-available)] data-[state=on]:font-[700] data-[state=on]:text-[color:var(--text-forest)]"
-        aria-controls="personal-content"
-      >
-        最近搜尋
-      </ToggleGroupItem>
-      <ToggleGroupItem
-        value="parked"
-        class="text-secondary rounded-[6px] px-[10px] py-[6px] text-[14px] hover:bg-[color:var(--background-primary)] data-[state=on]:bg-[color:var(--background-available)] data-[state=on]:font-[700] data-[state=on]:text-[color:var(--text-forest)]"
-        aria-controls="personal-content"
-      >
-        停車記錄
+        {{ item.label }}
       </ToggleGroupItem>
     </ToggleGroupRoot>
     <CollapsibleContent
       id="personal-content"
-      class="bg-primary mt-[8px] max-h-[240px] overflow-y-auto rounded-[10px] p-[12px]"
+      class="bg-card line-primary absolute left-[12px] right-[12px] top-[100%] max-h-[50dvh] overflow-y-auto rounded-[20px] border-[1px] p-[16px] shadow-[0_8px_24px_var(--shadow-medium)] md:left-auto md:right-[20px] md:top-[calc(100%-12px)] md:w-[360px]"
     >
       <template v-if="tab === 'parked'">
         <template v-if="parked">
-          <p class="text-[14px] font-[700]">{{ parked.place.name }}</p>
+          <p class="text-[14px] font-[500]">{{ parked.place.name }}</p>
           <p
             class="text-secondary mt-[4px] whitespace-pre-wrap break-words text-[12px]"
           >
@@ -74,7 +68,7 @@ const tab = shallowRef('');
           </p>
           <div class="mt-[8px] flex gap-[12px] text-[12px]">
             <button
-              class="text-forest py-[6px]"
+              class="text-brand py-[6px]"
               @click="emit('editParking')"
             >
               編輯記錄
@@ -106,7 +100,7 @@ const tab = shallowRef('');
                 emit('open', item);
               "
             >
-              <span class="block break-words text-[14px] font-[700]">
+              <span class="block break-words text-[14px] font-[500]">
                 {{ item.name }}
               </span>
               <span
@@ -136,11 +130,18 @@ const tab = shallowRef('');
       <p class="text-secondary mt-[8px] text-[12px] first:mt-[0px]">
         收藏與最近搜尋保留 30 天；停車記錄保留至清除。
       </p>
+      <p
+        v-if="message"
+        role="status"
+        class="text-secondary mt-[8px] text-[12px]"
+      >
+        {{ message }}
+      </p>
     </CollapsibleContent>
     <p
-      v-if="message"
+      v-if="message && !tab"
       role="status"
-      class="text-secondary mt-[8px] text-[12px]"
+      class="bg-card line-primary absolute left-[12px] right-[12px] top-[100%] rounded-[12px] border-[1px] px-[12px] py-[8px] text-[12px] shadow-[0_4px_16px_var(--shadow-medium)] md:left-auto md:right-[20px] md:top-[calc(100%-12px)] md:w-[360px]"
     >
       {{ message }}
     </p>
@@ -152,7 +153,7 @@ const tab = shallowRef('');
 
 ## 元件定位
 
-- 以可展開區塊呈現收藏、最近搜尋與停車記錄；子元件位於 src/components/explore。
+- 收藏、最近搜尋與停車記錄的膠囊選單；由父頁面放進 ExploreMapToolbar 的 slot：手機接在定位與更新車位後方、可橫向捲動，桌面為地圖右上角的一組膠囊。子元件位於 src/components/explore。
 
 ## 公開介面
 
@@ -163,11 +164,15 @@ const tab = shallowRef('');
 
 ## 主要行為
 
+- 選擇收藏、最近搜尋或停車記錄時，在膠囊列下方展開浮動面板：手機左右滿版，桌面靠右寬 360px；再點同一項目收起。
 - 由父頁面處理重開地點、刪除收藏與停車記錄編輯；不顯示過去保存的車位數。
-- 點選收藏或最近搜尋項目後自動收起，避免手機版結果被推出首屏。
+- 點選收藏或最近搜尋項目後自動收起，避免結果被面板遮住。
+- 儲存提示在面板收起時以浮動提示顯示，展開時改列在面板內。
 
 ## 狀態與限制
 
-- 紀錄僅保存在此瀏覽器；展開內容高度有限並可捲動。
+- 根節點不設定位，面板與提示以 ExploreMapToolbar 外層為定位基準，浮在地圖與清單上方，不改變版面高度，也不被膠囊列的橫向捲動裁切。
+- 選取中的膠囊使用 Reka data-state 搭配 Tailwind arbitrary value class 引用主題變數。
+- 紀錄僅保存在此瀏覽器；面板高度上限 50dvh 並可捲動。
 - 尺寸與效果使用 tag 上明確數值 Tailwind class；顏色 class 為 variables.scss 普通 class，色值位於 theme-color.scss。
 </spec>

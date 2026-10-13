@@ -17,8 +17,8 @@
 .text-rating {
   color: var(--text-rating);
 }
-.text-forest {
-  color: var(--text-forest);
+.text-brand {
+  color: var(--text-brand);
 }
 .text-few-text {
   color: var(--text-few-text);
@@ -33,6 +33,9 @@
 }
 .bg-card {
   background-color: var(--background-card);
+}
+.bg-input {
+  background-color: var(--background-input);
 }
 .bg-brand-secondary {
   background-color: var(--brand-secondary);
@@ -54,6 +57,9 @@
 }
 .bg-few {
   background-color: var(--status-few);
+}
+.bg-few-light {
+  background-color: var(--background-few);
 }
 .bg-full-marker {
   background-color: var(--status-full-marker);

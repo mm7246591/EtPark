@@ -22,10 +22,10 @@ textarea:focus-visible {
   outline-offset: 2px;
 }
 
-// 圖示字型共用設定，尺寸與色彩由各 template 指定。
+// 圖示字型共用設定，尺寸與色彩由各 template 指定；細線 300 與 index.html 載入的字重一致。
 .material-symbols-rounded {
   font-family: 'Material Symbols Rounded';
-  font-weight: normal;
+  font-weight: 300;
   font-style: normal;
   line-height: 1;
   letter-spacing: normal;

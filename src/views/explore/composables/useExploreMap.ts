@@ -36,6 +36,12 @@ export const useExploreMap = (
     });
     markers.value = [];
   };
+  // 搜尋膠囊、操作列與桌面左側面板蓋在地圖邊緣，縮放時留白讓標記落在看得到的範圍。
+  // ponytail: 依目前浮層尺寸估算，浮層尺寸改變時要同步調整。
+  const fitPadding = () =>
+    window.matchMedia('(min-width: 768px)').matches
+      ? { top: 84, right: 60, bottom: 60, left: 480 }
+      : { top: 130, right: 40, bottom: 40, left: 40 };
   const render = () => {
     if (blocked.value || !map || !markerLibrary) return;
     clear();
@@ -47,11 +53,13 @@ export const useExploreMap = (
         position: place.location,
         content,
         title: place.name,
+        // 目的地圖釘疊在停車場標記上方，不被周邊標記蓋住。
+        zIndex: place.kind === 'food' ? 1_000_000 : undefined,
       });
       bounds.extend(place.location);
       return { place, host: content, marker };
     });
-    if (places.value.length > 1) map.fitBounds(bounds, 60);
+    if (places.value.length > 1) map.fitBounds(bounds, fitPadding());
     else if (places.value[0]) {
       map.setCenter(places.value[0].location);
       map.setZoom(16);
@@ -88,6 +96,8 @@ export const useExploreMap = (
         streetViewControl: false,
         mapTypeControl: false,
         fullscreenControl: false,
+        // 版面不放縮放鈕，縮放改用手勢或滑鼠滾輪。
+        cameraControl: false,
         clickableIcons: false,
       });
       ready.value = true;

@@ -17,8 +17,6 @@ import type { ParkingSort } from '@/views/explore/types/personal';
 const props = defineProps<{
   sort: ParkingSort[];
   disabled: boolean;
-  total: number;
-  count: number;
 }>();
 const emit = defineEmits<{ sort: [value: ParkingSort[]] }>();
 const sorts: { value: ParkingSort; label: string }[] = [
@@ -47,15 +45,9 @@ watch(
 
 <template>
   <section
-    class="line-primary relative mb-[16px] flex items-center justify-between gap-[8px] border-b-[1px] pb-[12px]"
+    class="relative flex items-center gap-[8px]"
     aria-label="停車場排序"
   >
-    <p
-      role="status"
-      class="text-secondary text-[12px]"
-    >
-      顯示 {{ count }} / {{ total }} 個停車場
-    </p>
     <DropdownMenuRoot
       v-model:open="open"
       :modal="false"
@@ -63,7 +55,7 @@ watch(
       <DropdownMenuTrigger
         :disabled="disabled"
         aria-label="停車場排序"
-        class="text-forest flex shrink-0 items-center gap-[6px] rounded-[6px] px-[8px] py-[8px] text-[12px] disabled:opacity-[0.5]"
+        class="bg-input text-primary line-primary flex min-h-[32px] shrink-0 items-center gap-[4px] rounded-[9999px] border-[1px] px-[12px] text-[12px] disabled:opacity-[0.5] md:pr-[8px]"
       >
         {{
           sort.length === 1
@@ -74,7 +66,7 @@ watch(
         }}
         <span
           aria-hidden="true"
-          class="material-symbols-rounded text-[18px] transition-transform duration-[200ms] motion-reduce:transition-none"
+          class="material-symbols-rounded text-[16px] transition-transform duration-[200ms] motion-reduce:transition-none max-md:!hidden"
           :class="open ? 'rotate-180' : ''"
         >
           expand_more
@@ -141,7 +133,7 @@ watch(
             <span class="flex-1">{{ option.label }}</span>
             <span
               v-if="sort.includes(option.value)"
-              class="font-[700]"
+              class="font-[500]"
               :aria-label="`第 ${sort.indexOf(option.value) + 1} 優先`"
             >
               {{ priority(option.value) }}
@@ -158,11 +150,11 @@ watch(
 
 ## 元件定位
 
-- 停車場數量右側的客製下拉篩選與排序；子元件位於 src/components/explore。
+- 清單分頁下方「搜尋範圍」右側的停車場排序外框膠囊按鈕與客製下拉選單；子元件位於 src/components/explore，由 ExploreResultCards 的 parking-controls slot 放入。
 
 ## 公開介面
 
-- Props：sort（勾選順序）、disabled、total、count。
+- Props：sort（勾選順序）、disabled。
 - v-model：無。
 - Emits：sort。
 - 主要依賴：Vue、Reka UI DropdownMenu／Popover、views/explore/types/personal。
@@ -173,7 +165,7 @@ watch(
 - 車位由多到少並排除未知、停一小時費用由低到高；依優先順序比較，相同時比較下一項。
 - 點選或取消排序時維持展開；支援方向鍵、Escape、點擊外部關閉。
 - 排序規則以排序方式旁的驚嘆號按鈕點擊展開浮動說明（Popover），再次點擊、Escape 或點擊外部關閉，下拉選單關閉時一併收起；由 Reka UI 計算位置並避開視窗邊緣，圖示僅有 cursor pointer，沒有 hover 動畫或變色。
-- 下拉箭頭使用 200ms 旋轉動畫，減少動態效果偏好時停用動畫。
+- 下拉箭頭只在桌面顯示（手機依設計稿只有文字），使用 200ms 旋轉動畫，減少動態效果偏好時停用動畫；main.scss 的圖示 class 設了 display，手機隱藏以 `max-md:!hidden` 覆蓋。
 - 選項不使用 hover 背景效果；勾選時只顯示打勾與①②③優先序，文字與底色維持不變，鍵盤聚焦以 outline 提示。
 
 ## 狀態與限制

@@ -29,7 +29,7 @@ const { markers, mapError, ready } = useExploreMap(
 <template>
   <section
     aria-label="目的地與附近停車場地圖"
-    class="bg-primary relative h-[28dvh] min-h-[160px] w-[100%] shrink-0 overflow-hidden md:h-[100%] md:min-h-[0px] md:min-w-[0px] md:flex-1"
+    class="bg-primary relative min-h-[0px] min-w-[0px] overflow-hidden [grid-area:1/1/4/2] md:[grid-area:1/1/-1/-1]"
   >
     <div
       ref="host"
@@ -46,75 +46,71 @@ const { markers, mapError, ready } = useExploreMap(
         >
           map
         </span>
-        <h2 class="text-[18px] font-[700]">{{ mapError || '地圖載入中…' }}</h2>
+        <h2 class="text-[18px] font-[500]">{{ mapError || '地圖載入中…' }}</h2>
         <p class="text-secondary max-w-[360px] text-[14px] leading-[22px]">
           設定完成後會顯示真實 Google 地圖與停車場標記。請先設定
           key，再搜尋實際店名或地址。
         </p>
       </template>
     </div>
-    <p
-      v-if="selected"
-      role="status"
-      class="bg-card pointer-events-none absolute left-[16px] top-[16px] flex max-w-[80%] items-center gap-[6px] rounded-[8px] px-[12px] py-[8px] text-[14px] shadow-[0_1px_2px_0_var(--shadow-soft)]"
-    >
-      <span
-        aria-hidden="true"
-        class="material-symbols-rounded shrink-0 text-[18px]"
-      >
-        location_on
-      </span>
-      <span>{{ selected.name }}</span>
-    </p>
     <Teleport
       v-for="{ place, host: markerHost } in markers"
       :key="`${place.kind}-${place.id}`"
       :to="markerHost"
     >
+      <!-- 目的地為圓形圖釘加下方名稱；名稱絕對定位，標記錨點（底部中央）只看圓形，再下移半個圓讓圓心落在實際位置。 -->
       <button
-        class="line-inverse flex min-h-[40px] items-center gap-[4px] whitespace-nowrap rounded-[9999px] border-[2px] px-[10px] py-[6px] text-[12px] font-[700] tabular-nums shadow-[0_4px_6px_-1px_var(--shadow-medium)]"
-        :class="[
-          place.kind === 'food'
-            ? 'bg-brand-secondary text-food-text'
-            : place.spaces === 0
-              ? 'bg-full text-white'
-              : 'bg-brand-primary text-white',
-          selected?.id === place.id
-            ? 'outline outline-[2px] outline-offset-[2px] outline-[color:var(--line-focus)]'
-            : '',
-        ]"
-        :aria-label="
-          place.kind === 'food'
-            ? `目的地：${place.name}`
-            : `${place.name}，${place.spaces === null ? '車位未提供' : `剩餘 ${place.spaces} 位`}`
-        "
+        v-if="place.kind === 'food'"
+        class="bg-brand-secondary text-food-text line-inverse relative flex h-[36px] w-[36px] translate-y-[18px] items-center justify-center rounded-[9999px] border-[3px] shadow-[0_3px_12px_var(--shadow-medium)] md:h-[44px] md:w-[44px] md:translate-y-[22px] md:border-[4px]"
+        :aria-label="`目的地：${place.name}`"
         :aria-pressed="selected?.id === place.id"
         @click="emit('select', place)"
       >
-        <template v-if="place.kind === 'food'">
-          <span
-            aria-hidden="true"
-            class="material-symbols-rounded shrink-0 text-[18px]"
-          >
-            location_on
-          </span>
+        <span
+          aria-hidden="true"
+          class="material-symbols-rounded text-[18px] md:text-[22px]"
+        >
+          location_on
+        </span>
+        <span
+          class="bg-card text-primary absolute left-[50%] top-[calc(100%+2px)] translate-x-[-50%] whitespace-nowrap rounded-[9999px] px-[8px] text-[12px]/[20px] font-[500] shadow-[0_2px_6px_var(--shadow-medium)] md:top-[calc(100%+4px)] md:px-[10px] md:py-[2px]"
+        >
           {{ place.name }}
-        </template>
-        <template v-else>
-          <span
-            aria-hidden="true"
-            class="material-symbols-rounded shrink-0 text-[18px]"
-          >
-            directions_car
-          </span>
-          {{
-            place.spaces === null
-              ? '未知'
+        </span>
+      </button>
+      <button
+        v-else
+        class="flex items-center gap-[4px] whitespace-nowrap rounded-[9999px] text-[12px] font-[500] tabular-nums shadow-[0_3px_10px_var(--shadow-medium)]"
+        :class="[
+          selected?.id === place.id
+            ? 'bg-brand-tertiary text-inverse line-inverse border-[3px] px-[12px] py-[5px] md:px-[14px] md:py-[7px]'
+            : 'border-[1px] px-[9px] py-[2px] md:px-[10px] md:py-[3px]',
+          selected?.id === place.id
+            ? ''
+            : place.spaces === null
+              ? 'bg-card text-brand line-parking'
               : place.spaces === 0
-                ? '滿'
-                : place.spaces
-          }}
-        </template>
+                ? 'bg-full line-inverse text-white'
+                : 'bg-brand-primary text-inverse line-parking',
+        ]"
+        :aria-label="`${place.name}，${place.spaces === null ? '車位未提供' : `剩餘 ${place.spaces} 位`}`"
+        :aria-pressed="selected?.id === place.id"
+        @click="emit('select', place)"
+      >
+        <!-- main.scss 的圖示 class 設了 display，手機隱藏需用 ! 覆蓋。 -->
+        <span
+          aria-hidden="true"
+          class="material-symbols-rounded text-[14px] max-md:!hidden"
+        >
+          directions_car
+        </span>
+        {{
+          place.spaces === null
+            ? '未知'
+            : place.spaces === 0
+              ? '滿'
+              : place.spaces
+        }}
       </button>
     </Teleport>
   </section>
@@ -148,8 +144,8 @@ const { markers, mapError, ready } = useExploreMap(
 
 - 未設定 key 時呈現設定提示；Google 地圖與搜尋需要有效 key。
 - 卸載後清除標記與地圖事件，非同步初始化忽略已卸載元件。
-- 停車場標記為森林綠底白字，目的地標記為陶土橘底白字；載入前顯示紙色格線底。
+- 停車場標記為車位數膠囊（桌面前方加車子圖示）：有車位為藍染底白字、未提供為白底藍框「未知」、滿位為紅底「滿」，選取中加深並加粗白框；目的地標記為弁柄紅圓形圖釘（白框、定位圖示），名稱以白底膠囊標在下方，圓心對準實際位置；手機圖釘 36px、桌面 44px；載入前顯示紙色格線底。
 - 尺寸、陰影與選取效果使用 tag 上明確數值 Tailwind class；顏色為 variables.scss 的普通 class，色值位於 theme-color.scss。
-- 手機地圖為 28dvh、最小 160px，清單使用剩餘高度；桌面採左右欄。
-- 保留 Google 地圖原有來源標示與控制項；不呼叫 Nearby Search。
+- 手機佔頁面格線第 1～3 列（搜尋膠囊與操作列浮在上方），底部抽屜接在下方、不蓋住地圖底部，保留 Google 標誌；桌面鋪滿整頁，左側浮動面板疊在上方。選取名稱由清單卡片外框呈現，地圖上不另外顯示。
+- 保留 Google 標誌、地圖資料版權與條款連結（服務條款要求）；關閉縮放鈕，縮放改用手勢或滑鼠；不呼叫 Nearby Search。
 </spec>

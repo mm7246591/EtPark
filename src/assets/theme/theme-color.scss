@@ -1,52 +1,54 @@
-// 森林紙感：暖紙色底、墨綠文字，森林綠為主要操作色，陶土橘標示目的地。
+// 藍染：米白紙色底、墨藍文字，藍染為主要操作色，弁柄紅標示目的地。
 :root {
   // Brand
-  --brand-primary: #2f4a3a; // 森林綠：主要按鈕、停車場標記
-  --brand-secondary: #c2410c; // 陶土橘：目的地標記
-  --brand-tertiary: #243a2d; // 森林綠 hover
+  --brand-primary: #284a63; // 藍染：主要按鈕、停車場標記
+  --brand-secondary: #a8573a; // 弁柄：目的地標記
+  --brand-tertiary: #1d3a50; // 藍染 hover
 
   // Text
-  --text-inverse: #fbf9f4;
-  --text-primary: #1f2a22;
-  --text-secondary: #5a635b;
-  --text-food-text: #fffcf7;
-  --text-food-outline: #c2410c;
-  --text-rating: #79572f;
-  --text-forest: #2f4a3a;
+  --text-inverse: #fbfaf7;
+  --text-primary: #1c2530;
+  --text-secondary: #586170;
+  --text-food-text: #fffdf9;
+  --text-food-outline: #a8573a;
+  --text-rating: #7a5a33;
+  --text-brand: #284a63;
   --text-few-text: #8a5300;
   --text-white: #ffffff;
 
   // Line
-  --line-primary: #e3ddd0;
-  --line-control: #cfc6b4;
-  --line-food: #c2410c;
-  --line-parking: #2f4a3a;
-  --line-selected: #2f4a3a;
-  --line-food-marker: #c2410c;
-  --line-inverse: #fbf9f4;
+  --line-primary: #e1ded6;
+  --line-control: #c9c4b8;
+  --line-food: #a8573a;
+  --line-parking: #284a63;
+  --line-selected: #284a63;
+  --line-food-marker: #a8573a;
+  --line-inverse: #fbfaf7;
   --line-white: #ffffff;
-  --line-focus: #2f4a3a;
+  --line-focus: #284a63;
 
   // Background
-  --background-primary: #f4f1ea;
-  --background-card: #fbf9f4;
-  --background-food-active: #f5e6dc;
-  --background-available: #e4ebe2;
-  --background-selected: rgb(47 74 58 / 12%);
+  --background-primary: #f2f0ea;
+  --background-card: #fbfaf7;
+  --background-input: #ffffff;
+  --background-food-active: #f3e3da;
+  --background-available: #e1e8ee;
+  --background-few: #f5e8d2; // 剩餘車位少的標籤底色
+  --background-selected: rgb(40 74 99 / 12%);
 
   // Status
-  --status-full: #a63d32;
-  --status-few: #d69a2d;
-  --status-full-marker: #7b756b;
+  --status-full: #a3392f;
+  --status-few: #d39a2e;
+  --status-full-marker: #7a7a78;
 
   // Location
   --location-primary: #2f80ed;
 
   // Mask
-  --mask-dialog: rgb(31 42 34 / 40%);
+  --mask-dialog: rgb(28 37 48 / 40%);
 
   // Shadow
-  --shadow-soft: rgb(31 42 34 / 6%);
-  --shadow-medium: rgb(31 42 34 / 12%);
+  --shadow-soft: rgb(28 37 48 / 6%);
+  --shadow-medium: rgb(28 37 48 / 12%);
   --shadow-location: #2f80ed;
 }
