@@ -87,7 +87,7 @@ const ignoreEnter = (event: KeyboardEvent) => {
           id="destination-query"
           v-model="query"
           class="min-w-[0px] flex-1 bg-transparent py-[8px] text-[16px] focus-visible:outline-none"
-          placeholder="輸入台灣店名或地址"
+          placeholder="輸入店名或地址"
           :disabled="blocked || loading || !mapsConfigured"
           @update:model-value="updateQuery"
           @compositionstart="composing = true"
