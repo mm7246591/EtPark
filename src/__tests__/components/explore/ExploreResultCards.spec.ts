@@ -44,8 +44,8 @@ it('停車場卡片顯示車位、距離分鐘、計費方式，選取後才展�
   expect(html).toContain('12 位');
   expect(html).toContain('200 m');
   expect(html).toContain('開車約 7 分鐘');
-  expect(html).toContain('計費方式：30/hr');
-  expect(html).not.toContain('20/次');
+  expect(html).toContain('計費方式：30元/小時');
+  expect(html).not.toContain('20元/次');
   expect(html).not.toContain('開始導航');
   expect(html).toContain('aria-label="收合清單"');
   const selected = await render({ selected: props.places[0] });

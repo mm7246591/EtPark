@@ -105,7 +105,7 @@ const parseParkingFee = (description: string) => {
         const label = groups.cap24
           ? '24 小時內上限'
           : capLabel(`${parts[index - 1] ?? ''};${part}`);
-        cap = cap || `${label} ${groups.cap || groups.cap24}`;
+        cap = cap || `${label} ${groups.cap || groups.cap24}元`;
       } else if (groups.freeMinutes)
         freeMinutes = freeMinutes ?? Number(groups.freeMinutes);
       else if (groups.first)
@@ -151,18 +151,18 @@ const parseParkingFee = (description: string) => {
 
 const periodText = (minutes: number) => {
   if (minutes === 24 * 60) return '天';
-  if (minutes === 60) return 'hr';
-  return minutes % 60 === 0 ? `${minutes / 60}hr` : `${minutes}min`;
+  if (minutes === 60) return '小時';
+  return minutes % 60 === 0 ? `${minutes / 60}小時` : `${minutes}分鐘`;
 };
 
 const itemText = (item: FeeItem) => {
-  if (item.kind === 'first') return `首hr ${item.amount}`;
-  if (item.kind === 'entry') return `${item.amount}/次`;
+  if (item.kind === 'first') return `首小時 ${item.amount}元`;
+  if (item.kind === 'entry') return `${item.amount}元/次`;
   const time = item.band ? `(${item.band})` : '';
-  return `${item.amount}/${periodText(item.minutes)}${time}`;
+  return `${item.amount}元/${periodText(item.minutes)}${time}`;
 };
 
-// 依原始計費單位顯示，例如 60/hr、50/30min、50/次；超過兩段時同單位顯示區間，否則列最常見的費率。
+// 依原始計費單位顯示，例如 60元/小時、50元/30分鐘、50元/次；超過兩段時同單位顯示區間，否則列最常見的費率。
 const formatParkingFee = (description: string): string => {
   const { items, cap, freeMinutes, free, text } = parseParkingFee(description);
   if (!items.length) {
@@ -196,8 +196,8 @@ const formatParkingFee = (description: string): string => {
     const period = periodText(unique[0].minutes);
     rates =
       low === high
-        ? [`${low}/${period}`]
-        : [`${low}–${high}/${period}`, '多段費率'];
+        ? [`${low}元/${period}`]
+        : [`${low}–${high}元/${period}`, '多段費率'];
   } else if (unique.length > 2) {
     const counts = new Map<string, number>();
     items.forEach((item) => {
