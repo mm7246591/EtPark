@@ -25,6 +25,7 @@ export const useExploreMap = (
     mapsConfigured ? '' : '尚未設定 Google Maps API key'
   );
   const ready = shallowRef(false);
+  const tilesLoaded = shallowRef(false);
   let map: google.maps.Map | undefined;
   let markerLibrary: google.maps.MarkerLibrary | undefined;
   let disposed = false;
@@ -76,6 +77,7 @@ export const useExploreMap = (
     map = undefined;
     host.value?.replaceChildren();
     ready.value = false;
+    tilesLoaded.value = false;
   });
   onMounted(async () => {
     if (!mapsConfigured) return;
@@ -104,6 +106,10 @@ export const useExploreMap = (
         keyboardShortcuts: false,
         clickableIcons: false,
       });
+      // 第一次圖磚畫完才顯示地圖，避免先閃出 Google 未套用樣式（或白天）的預覽圖。
+      google.maps.event.addListenerOnce(map, 'tilesloaded', () => {
+        tilesLoaded.value = true;
+      });
       ready.value = true;
       render();
     } catch (error) {
@@ -117,5 +123,5 @@ export const useExploreMap = (
     clear();
     if (map) google.maps.event.clearInstanceListeners(map);
   });
-  return { markers, mapError, ready };
+  return { markers, mapError, ready, tilesLoaded };
 };

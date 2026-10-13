@@ -19,7 +19,7 @@ const places = computed<Place[]>(() => [
   ...props.restaurants,
   ...props.parkingLots,
 ]);
-const { markers, mapError, ready } = useExploreMap(
+const { markers, mapError, ready, tilesLoaded } = useExploreMap(
   host,
   places,
   toRef(props, 'selected')
@@ -33,7 +33,8 @@ const { markers, mapError, ready } = useExploreMap(
   >
     <div
       ref="host"
-      class="absolute inset-[0px]"
+      class="absolute inset-[0px] transition-opacity duration-[200ms] motion-reduce:transition-none"
+      :class="tilesLoaded ? 'opacity-[1]' : 'opacity-[0]'"
     ></div>
     <div
       v-if="!ready"
@@ -144,6 +145,7 @@ const { markers, mapError, ready } = useExploreMap(
 
 - 未設定 key 時呈現設定提示；Google 地圖與搜尋需要有效 key。
 - 卸載後清除標記與地圖事件，非同步初始化忽略已卸載元件。
+- 第一次圖磚載入完成（tilesloaded）前地圖保持透明，只露出頁面底色，完成後 200ms 淡入，避免閃出 Google 未套用樣式的預覽圖；減少動態效果偏好時不淡入。
 - 地圖深淺色以 colorScheme 跟隨系統，只在建立地圖時決定；開著頁面切換系統深淺色時，頁面顏色立即切換，地圖重新整理後才會跟上。
 - 停車場標記為車位數膠囊（桌面前方加車子圖示）：有車位為藍染底白字、未提供為白底藍框「未知」、滿位為紅底「滿」，選取中加深並加粗白框；目的地標記為弁柄紅圓形圖釘（白框、定位圖示），名稱以白底膠囊標在下方，圓心對準實際位置；手機圖釘 36px、桌面 44px；載入前顯示紙色格線底。
 - 尺寸、陰影與選取效果使用 tag 上明確數值 Tailwind class；顏色為 variables.scss 的普通 class，色值位於 theme-color.scss。
