@@ -98,6 +98,8 @@ export const useExploreMap = (
         fullscreenControl: false,
         // 版面不放縮放鈕，縮放改用手勢或滑鼠滾輪。
         cameraControl: false,
+        // 隱藏底部「鍵盤快速鍵」連結；同時停用方向鍵平移與 +/- 縮放。
+        keyboardShortcuts: false,
         clickableIcons: false,
       });
       ready.value = true;
