@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { shallowRef } from 'vue';
+import { shallowRef, watch } from 'vue';
+import type { ComponentPublicInstance } from 'vue';
 import {
   ToggleGroupRoot,
   ToggleGroupItem,
@@ -21,8 +22,33 @@ const emit = defineEmits<{
   clearRecent: [];
   editParking: [];
   clearParking: [];
+  opened: [];
 }>();
 const tab = shallowRef('');
+const root = shallowRef<ComponentPublicInstance | null>(null);
+// 面板展開時，點面板以外（搜尋框、地圖、清單）或按 Escape 都會收起，不必再點一次同一顆按鈕。
+// 用捕獲階段監聽，Google 地圖攔下事件前也能收到。
+const closeOnOutside = (event: Event) => {
+  if (
+    !(root.value?.$el as HTMLElement | undefined)?.contains(
+      event.target as Node
+    )
+  )
+    tab.value = '';
+};
+const closeOnEscape = (event: KeyboardEvent) => {
+  if (event.key === 'Escape') tab.value = '';
+};
+watch(tab, (value, previous, onCleanup) => {
+  if (!value) return;
+  if (!previous) emit('opened');
+  document.addEventListener('pointerdown', closeOnOutside, true);
+  document.addEventListener('keydown', closeOnEscape);
+  onCleanup(() => {
+    document.removeEventListener('pointerdown', closeOnOutside, true);
+    document.removeEventListener('keydown', closeOnEscape);
+  });
+});
 const items = [
   { value: 'favorites', label: '收藏' },
   { value: 'recent', label: '最近搜尋' },
@@ -33,6 +59,7 @@ const items = [
 <template>
   <!-- 不設定位：浮動面板以父層 ExploreMapToolbar 外層為基準，不被橫向捲動區裁切。 -->
   <CollapsibleRoot
+    ref="root"
     :open="Boolean(tab)"
     as="section"
     class="flex shrink-0"
@@ -157,12 +184,13 @@ const items = [
 
 - Props：favorites、recent、parked、message、disabled。
 - v-model：無。
-- Emits：open、removeFavorite、clearRecent、editParking、clearParking。
+- Emits：open、removeFavorite、clearRecent、editParking、clearParking、opened（從收起變成展開時發出，父頁面據此收合下方清單）。
 - 主要依賴：Vue、Reka UI ToggleGroup／Collapsible、views/explore/types/personal。
 
 ## 主要行為
 
-- 選擇收藏、最近搜尋或停車記錄時，在膠囊列下方展開浮動面板：手機左右滿版，桌面靠右寬 360px；再點同一項目收起。
+- 選擇收藏、最近搜尋或停車記錄時，在膠囊列下方展開浮動面板：手機左右滿版，桌面靠右寬 360px；再點同一項目、點面板以外的地方（搜尋框、地圖、清單）或按 Escape 收起。
+- 從收起變成展開時發出 opened，由父頁面收合下方停車場／目的地清單，避免面板與清單互相遮擋。
 - 由父頁面處理重開地點、刪除收藏與停車記錄編輯；不顯示過去保存的車位數。
 - 點選收藏或最近搜尋項目後自動收起，避免結果被面板遮住。
 - 儲存提示在面板收起時以浮動提示顯示，展開時改列在面板內。

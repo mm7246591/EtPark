@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { shallowRef, watch } from 'vue';
+import { shallowRef, useTemplateRef, watch } from 'vue';
 import { TabsRoot } from 'reka-ui';
 import ExplorePersonalPanel from '@/components/explore/ExplorePersonalPanel.vue';
 import ParkingControls from '@/components/explore/ParkingControls.vue';
@@ -58,6 +58,7 @@ const {
 watch(destination, (place) => {
   if (place && !place.id.startsWith('saved-parking:')) addRecent(place);
 });
+const resultCards = useTemplateRef('resultCards');
 const recordPlace = shallowRef<SavedPlace | null>(null);
 const recordNote = shallowRef('');
 const recordParking = (place: ParkingLot) => {
@@ -142,9 +143,11 @@ const navigateTo = (place: Parameters<typeof select>[0]) => {
           @clear-recent="clearRecent"
           @edit-parking="editParking"
           @clear-parking="clearParking"
+          @opened="resultCards?.collapse()"
         />
       </ExploreMapToolbar>
       <ExploreResultCards
+        ref="resultCards"
         :notice-message="message === dialogMessage ? '' : message"
         :parking-notice="parkingNotice"
         :active-kind="activeKind"
@@ -207,6 +210,7 @@ const navigateTo = (place: Parameters<typeof select>[0]) => {
 - 將目前分頁、清單與選取項目傳給子元件。
 - 點擊清單或地圖標記時，同步更新選取項目與所屬分頁。
 - 處理定位、導航與關閉提示事件。
+- 個人選單（收藏、最近搜尋、停車記錄）展開時，收合手機下方的停車場／目的地清單。
 - 輸入至少兩字並停頓 400ms 後查 Google 建議；首次搜尋自動請求定位，候選依可用直線距離排序；拒絕定位時保留 Google 候選順序。
 - 停車場排除滿位，預設依目的地直線距離排序；可切換剩餘車位由多到少或停一小時費用由低到高。
 - 停車場收藏與最近搜尋保存於瀏覽器，重開地點時重新查詢；停車記錄可保存樓層、區域或車格。
