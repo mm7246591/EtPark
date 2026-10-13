@@ -17,6 +17,7 @@ import type {
   SearchSuggestion,
   ParkingLot,
 } from '../../views/explore/types/place';
+import { formatParkingFee } from '../../views/explore/utils/parkingFee';
 
 const props = defineProps<{
   searching: boolean;
@@ -407,7 +408,10 @@ watch(
                 v-else-if="place.price"
                 class="text-secondary line-primary mt-[10px] block border-t-[1px] pt-[10px] text-[12px] leading-[20px]"
               >
-                {{ place.price }}
+                <span class="text-primary block">
+                  計費方式：{{ formatParkingFee(place.price) }}
+                </span>
+                <span class="block">實際費率以現場公告為準</span>
               </span>
             </button>
             <div class="mt-[12px] flex items-center justify-end gap-[4px]">
@@ -467,7 +471,7 @@ watch(
 - Props：searching、searchMessage、noticeMessage、source、parkingNotice、activeKind、selected（可為 null）、places、foodCount、suggestions、loading、blocked、blockedMessage、mapsConfigured、favoriteKeys、radius、expanding。
 - v-model：無公開 v-model，query 為內部輸入狀態。
 - Emits：inputSearch、search、chooseSuggestion、refresh、select、switchKind、navigate、locate、favorite、recordParking。
-- 主要依賴：views/explore/types/place、Vue、Reka UI Combobox／Tabs／Toggle、Tailwind CSS v3。
+- 主要依賴：views/explore/types/place、views/explore/utils/parkingFee、Vue、Reka UI Combobox／Tabs／Toggle、Tailwind CSS v3。
 
 ## 主要行為
 
@@ -481,7 +485,7 @@ watch(
 - 中文組字完成後發出 inputSearch，由頁面延遲 400ms 查建議；點擊搜尋按鈕可立即搜尋；搜尋框 Enter 僅確認組字，不搜尋或選店。
 - 建議只呈現名稱與地址；方向鍵移動候選高亮，點擊店家選取，Escape 關閉。
 - 搜尋時由頁面自動取得定位；拒絕定位仍能搜尋，選擇建議時發出 chooseSuggestion。
-- 顯示地址、臨停收費說明、距離（X m）與車位；收藏僅供停車場，已滿位不列入清單。
+- 顯示地址、距離（X m）、車位與計費方式：依原始單位顯示小型車臨停費率（60/hr、50/30min、50/次、首hr 20 · 之後 40/hr），平日／假日與時段分開列出，超過兩段時同單位顯示區間（不同單位列最常見費率）並標示「多段費率」；上限依原文標示當日、N 小時內、夜間、時段或單次，附前 N 分鐘免費；費率下方以次要文字提醒「實際費率以現場公告為準」；機車費率多數停車場未提供，不顯示；月租、季租等長期費用不顯示，無法判讀時保留原文；收藏僅供停車場，已滿位不列入清單。
 - 分頁支援方向鍵、Home 與 End；清單使用穩定 id。
 - 定位、導航與更新操作由父元件處理。
 

@@ -34,7 +34,7 @@ const props = {
       location: { lat: 25, lng: 121 },
       distance: 200,
       spaces: 12,
-      price: '每小時 30 元',
+      price: '每小時 30 元；機車每次 20 元',
       drivingMinutes: 7,
     },
   ],
@@ -58,6 +58,9 @@ it('搜尋候選只呈現店名地址，停車場保留分鐘與開始導航', a
   expect(html).toMatch(/>\s*12\s*</);
   expect(html).toContain('200 m');
   expect(html).toContain('開車約 7 分鐘');
+  expect(html).toContain('計費方式：30/hr');
+  expect(html).toContain('實際費率以現場公告為準');
+  expect(html).not.toContain('20/次');
   expect(html).toContain('開始導航');
   expect(html).not.toContain('開車路線');
 });
