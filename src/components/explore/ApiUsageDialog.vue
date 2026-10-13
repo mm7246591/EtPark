@@ -36,7 +36,7 @@ const rememberFocus = () => {
         @open-auto-focus="rememberFocus"
         @close-auto-focus.prevent="returnFocus?.focus()"
       >
-        <AlertDialogTitle class="text-[18px] font-[700]">
+        <AlertDialogTitle class="text-[18px] font-[500]">
           查詢暫停
         </AlertDialogTitle>
         <AlertDialogDescription class="text-secondary mt-[12px] text-[14px]">
