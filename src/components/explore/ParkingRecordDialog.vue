@@ -68,7 +68,7 @@ watch(
             maxlength="160"
             rows="3"
             placeholder="例如：B2／C 區／125 號車格"
-            class="bg-primary line-primary mt-[6px] w-[100%] resize-none rounded-[8px] border-[1px] p-[10px] text-[14px]"
+            class="bg-primary line-primary mt-[6px] w-[100%] resize-none rounded-[8px] border-[1px] p-[10px] text-[16px]"
           ></textarea>
           <div class="mt-[16px] flex justify-end gap-[8px]">
             <DialogClose

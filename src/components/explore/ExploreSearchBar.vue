@@ -86,7 +86,7 @@ const ignoreEnter = (event: KeyboardEvent) => {
         <ComboboxInput
           id="destination-query"
           v-model="query"
-          class="min-w-[0px] flex-1 bg-transparent py-[8px] text-[14px] focus-visible:outline-none"
+          class="min-w-[0px] flex-1 bg-transparent py-[8px] text-[16px] focus-visible:outline-none"
           placeholder="輸入台灣店名或地址"
           :disabled="blocked || loading || !mapsConfigured"
           @update:model-value="updateQuery"
@@ -178,6 +178,7 @@ const ignoreEnter = (event: KeyboardEvent) => {
 - 查詢中、配額封鎖或未設定 key 時停用輸入與搜尋；未設定 key 時顯示設定提示。
 - 搜尋框聚焦時，手機以整顆膠囊、桌面以搜尋框外框顯示 focus outline，輸入框本身不另畫外框。
 - 搜尋按鈕為 44px 圓形放大鏡圖示，保留 aria-label 與 title。
+- 輸入框字級 16px：iOS（含 LINE 內建瀏覽器）聚焦小於 16px 的輸入框會自動放大頁面，造成版面左右位移。
 - 字體沿用全站 Noto Sans TC。
 - 尺寸與效果使用 tag 上明確數值 Tailwind class；顏色使用 variables.scss 的普通 class，色值集中 theme-color.scss。
 </spec>
