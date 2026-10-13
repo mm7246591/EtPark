@@ -13,22 +13,33 @@ const props = defineProps<{
   selected: Place | null;
   blocked: boolean;
 }>();
-const emit = defineEmits<{ select: [place: Place] }>();
+const emit = defineEmits<{ select: [place: Place]; blankClick: [] }>();
 const host = shallowRef<HTMLElement | null>(null);
 const places = computed<Place[]>(() => [
   ...props.restaurants,
   ...props.parkingLots,
 ]);
+// 點標記時 Google 也會發出地圖 click，且拿不到原本的點擊目標；
+// 改記錄最近一次按下的位置是否在標記按鈕上，按在標記上就不算點空白處。
+let pressedMarker = false;
+const notePress = (event: PointerEvent) => {
+  pressedMarker =
+    event.target instanceof Element && Boolean(event.target.closest('button'));
+};
 const { markers, mapError, ready, tilesLoaded } = useExploreMap(
   host,
   places,
-  toRef(props, 'selected')
+  toRef(props, 'selected'),
+  () => {
+    if (!pressedMarker) emit('blankClick');
+  }
 );
 </script>
 
 <template>
   <section
     aria-label="目的地與附近停車場地圖"
+    @pointerdown.capture="notePress"
     class="bg-primary relative min-h-[0px] min-w-[0px] overflow-hidden [grid-area:1/1/4/2] md:[grid-area:1/1/-1/-1]"
   >
     <div
@@ -129,7 +140,7 @@ const { markers, mapError, ready, tilesLoaded } = useExploreMap(
 
 - Props：restaurants、parkingLots、selected（可為 null）、blocked。
 - v-model：無。
-- Emits：select(place)。
+- Emits：select(place)、blankClick（點地圖空白處，拖曳不算；點標記不觸發）。
 - 主要依賴：useExploreMap、Google Maps JavaScript API、Vue Teleport。
 
 ## 主要行為

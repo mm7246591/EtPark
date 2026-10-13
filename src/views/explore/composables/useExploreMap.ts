@@ -11,7 +11,8 @@ import type { Place } from '../types/place';
 export const useExploreMap = (
   host: Ref<HTMLElement | null>,
   places: Ref<Place[]>,
-  selected: Ref<Place | null>
+  selected: Ref<Place | null>,
+  onBlankClick?: () => void
 ) => {
   const { blocked, handleApiError, dialogMessage } = useApiUsage();
   const markers = shallowRef<
@@ -106,6 +107,8 @@ export const useExploreMap = (
         keyboardShortcuts: false,
         clickableIcons: false,
       });
+      // 點地圖（拖曳不算）時通知；是否點在標記上由呼叫端判斷。
+      if (onBlankClick) map.addListener('click', onBlankClick);
       // 第一次圖磚畫完才顯示地圖，避免先閃出 Google 未套用樣式（或白天）的預覽圖。
       google.maps.event.addListenerOnce(map, 'tilesloaded', () => {
         tilesLoaded.value = true;
