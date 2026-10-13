@@ -30,7 +30,6 @@ const props = defineProps<{
   suggestions: SearchSuggestion[];
   loading: boolean;
   blocked: boolean;
-  blockedMessage: string;
   mapsConfigured: boolean;
   places: Place[];
   foodCount: number;
@@ -293,21 +292,14 @@ watch(
             {{ parkingNotice }}
           </p>
           <p
-            v-if="blocked"
-            role="status"
-            class="text-secondary p-[24px] text-center text-[14px]"
-          >
-            {{ blockedMessage }}
-          </p>
-          <p
-            v-else-if="loading && !expanding"
+            v-if="!blocked && loading && !expanding"
             role="status"
             class="text-secondary mb-[12px] text-[14px]"
           >
             資料載入中…
           </p>
           <p
-            v-else-if="!loading && !places.length"
+            v-else-if="!blocked && !loading && !places.length"
             class="text-secondary mb-[12px] text-[14px]"
           >
             {{
@@ -468,7 +460,7 @@ watch(
 
 ## 公開介面
 
-- Props：searching、searchMessage、noticeMessage、source、parkingNotice、activeKind、selected（可為 null）、places、foodCount、suggestions、loading、blocked、blockedMessage、mapsConfigured、favoriteKeys、radius、expanding。
+- Props：searching、searchMessage、noticeMessage、source、parkingNotice、activeKind、selected（可為 null）、places、foodCount、suggestions、loading、blocked、mapsConfigured、favoriteKeys、radius、expanding。
 - v-model：無公開 v-model，query 為內部輸入狀態。
 - Emits：inputSearch、search、chooseSuggestion、refresh、select、switchKind、navigate、locate、favorite、recordParking。
 - 主要依賴：views/explore/types/place、views/explore/utils/parkingFee、Vue、Reka UI Combobox／Tabs／Toggle、Tailwind CSS v3。
@@ -494,7 +486,7 @@ watch(
 - 使用 Google Material Symbols Rounded，裝飾圖示設為 aria-hidden，操作保留文字或 aria-label。
 
 - 手機版整個清單欄可捲動，操作區不固定占用結果高度；桌面保留清單獨立捲動。
-- 處理載入、未設定 key、空清單及 nullable 選取狀態，不直接呼叫 API。
+- 處理載入、未設定 key、空清單及 nullable 選取狀態，不直接呼叫 API；查詢額度用盡時清單區不顯示提示文字，由對話框說明。
 - 尺寸與效果使用 tag 上明確數值 Tailwind class；顏色使用 variables.scss 的普通 class，色值集中 theme-color.scss。
 - 分頁與收藏的選取狀態使用 Reka data-state 搭配 Tailwind arbitrary value class 引用主題變數；目的地用陶土橘，停車場與主要按鈕用森林綠。
 - 文字最低 12px，依 Tailwind v3 字級採用 12、14、16、18、20、24px 等級距，保留明確 px 寫法。

@@ -68,7 +68,6 @@ export const useExploreMap = (
     map = undefined;
     host.value?.replaceChildren();
     ready.value = false;
-    mapError.value = dialogMessage.value;
   });
   onMounted(async () => {
     if (!mapsConfigured) return;

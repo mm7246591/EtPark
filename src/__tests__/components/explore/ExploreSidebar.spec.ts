@@ -23,7 +23,6 @@ const props = {
   ],
   loading: false,
   blocked: false,
-  blockedMessage: '',
   mapsConfigured: true,
   places: [
     {
@@ -74,4 +73,12 @@ it('未定位或沒有時間時不顯示時間與未提供提示', async () => {
   );
   expect(html).not.toMatch(/約 \d+ 分鐘/);
   expect(html).not.toContain('距離未提供');
+});
+
+it('查詢額度用盡時清單區不顯示提示文字，只由對話框說明', async () => {
+  const html = await renderToString(
+    createSSRApp(ExploreSidebar, { ...props, blocked: true, places: [] })
+  );
+  expect(html).not.toContain('搜尋並選擇目的地');
+  expect(html).not.toContain('資料載入中');
 });

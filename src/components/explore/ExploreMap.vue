@@ -39,20 +39,19 @@ const { markers, mapError, ready } = useExploreMap(
       v-if="!ready"
       class="absolute inset-[0px] flex flex-col items-center justify-center gap-[12px] bg-[image:linear-gradient(90deg,var(--line-primary)_1px,transparent_1px),linear-gradient(var(--line-primary)_1px,transparent_1px)] bg-[size:100px_100px] px-[24px] text-center"
     >
-      <span
-        aria-hidden="true"
-        class="material-symbols-rounded shrink-0 text-[36px]"
-      >
-        map
-      </span>
-      <h2 class="text-[18px] font-[700]">{{ mapError || '地圖載入中…' }}</h2>
-      <p
-        v-if="!blocked"
-        class="text-secondary max-w-[360px] text-[14px] leading-[22px]"
-      >
-        設定完成後會顯示真實 Google 地圖與停車場標記。請先設定
-        key，再搜尋實際店名或地址。
-      </p>
+      <template v-if="!blocked">
+        <span
+          aria-hidden="true"
+          class="material-symbols-rounded shrink-0 text-[36px]"
+        >
+          map
+        </span>
+        <h2 class="text-[18px] font-[700]">{{ mapError || '地圖載入中…' }}</h2>
+        <p class="text-secondary max-w-[360px] text-[14px] leading-[22px]">
+          設定完成後會顯示真實 Google 地圖與停車場標記。請先設定
+          key，再搜尋實際店名或地址。
+        </p>
+      </template>
     </div>
     <p
       v-if="selected"
@@ -141,7 +140,7 @@ const { markers, mapError, ready } = useExploreMap(
 - useExploreMap 只初始化一個地圖，以實際經緯度建立 Advanced Marker。
 - Vue Teleport 將 template 按鈕放入標記內容，點擊回報頁面更新選取。
 - 清單改變時更新標記與範圍；選取改變時平移地圖。
-- 未設定 key、載入失敗或載入中時呈現明確提示，不顯示假座標。
+- 未設定 key、載入失敗或載入中時呈現明確提示，不顯示假座標；查詢額度用盡時只由對話框提示，地圖區只留空白格線。
 
 ## 狀態與限制
 

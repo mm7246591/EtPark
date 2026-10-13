@@ -102,7 +102,6 @@ const navigateTo = (place: Parameters<typeof select>[0]) => {
       :suggestions="suggestions"
       :loading="loading || expanding"
       :blocked="blocked"
-      :blocked-message="dialogMessage"
       :maps-configured="mapsConfigured"
       :active-kind="activeKind"
       :selected="selected"
