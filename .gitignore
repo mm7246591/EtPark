@@ -16,8 +16,6 @@ dist-ssr
 .netlify/
 .agents/
 .claude/
-.codex/
-design-preview/
 
 # Editor directories and files
 .vscode/*
@@ -29,6 +27,3 @@ design-preview/
 *.njsproj
 *.sln
 *.sw?
-
-# Local runtime data
-.data/
