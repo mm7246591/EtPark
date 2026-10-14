@@ -2,6 +2,8 @@
 
 EtPark 是結合地點搜尋與停車資訊的網站。使用者輸入店名或地址後，可以查看目的地附近的停車場、剩餘車位與收費資訊，並開啟 Google Maps 開車導航。
 
+網站：<https://etpark.netlify.app/>
+
 ## 主要功能
 
 - 搜尋台灣店家或地址，提供候選地點與地址資訊。
@@ -77,15 +79,3 @@ EtPark/
 ```
 
 頁面元件放在 `src/views`，子元件放在 `src/components`；頁面專屬的邏輯、型別及常數與頁面共置，共用邏輯則放在 `src` 對應目錄。
-
-## 部署
-
-專案使用 Netlify Hosting 與 Functions。連接 GitHub repository 後，由 `netlify.toml` 設定建置指令 `npm run build`、發布目錄 `dist` 及 Function 目錄 `netlify/functions`。
-
-停車資料依縣市取得：台北市、新北市、新竹市使用市府開放資料，不需金鑰；其餘縣市使用交通部 TDX，需設定 `TDX_CLIENT_ID` 與 `TDX_CLIENT_SECRET`。TDX 有每分鐘呼叫上限，超過時 API 回傳 429，網站會提示稍候約一分鐘再查，不封鎖查詢。
-
-正式環境需在 Netlify 設定相同的環境變數：`VITE_` 變數供建置使用，TDX 變數供 Functions 使用。前端與 Functions 必須一起部署；僅拖曳上傳 `dist` 不會部署停車 API。
-
-行車時間需啟用 Routes API 並加入 Google API 金鑰的 API 限制。Route Matrix 按起點與終點組合的元素數計算用量，需另外設定配額；既有 Maps／Places 配額不包含此服務。
-
-收藏與最近搜尋僅保存在目前瀏覽器，地點資料保留 30 天；停車記錄保留至手動清除。保存紀錄不保留舊車位與行車時間，不跨裝置同步。費率排序僅比較可明確推算的一小時費用，條件不明的費率排在後方。
