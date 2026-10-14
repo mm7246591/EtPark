@@ -49,7 +49,7 @@ watch(
         @interact-outside.prevent
       >
         <form @submit.prevent="emit('save', draft)">
-          <DialogTitle class="text-[18px] font-[500]">記錄停車位置</DialogTitle>
+          <DialogTitle class="text-[18px] font-[500]">記錄車位</DialogTitle>
           <DialogDescription
             class="text-secondary mt-[8px] break-words text-[14px]"
           >
