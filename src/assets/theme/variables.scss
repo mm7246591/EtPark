@@ -14,9 +14,6 @@
 .text-food-outline {
   color: var(--text-food-outline);
 }
-.text-rating {
-  color: var(--text-rating);
-}
 .text-brand {
   color: var(--text-brand);
 }
@@ -46,9 +43,6 @@
 .bg-brand-tertiary {
   background-color: var(--brand-tertiary);
 }
-.bg-food-active {
-  background-color: var(--background-food-active);
-}
 .bg-available {
   background-color: var(--background-available);
 }
@@ -61,15 +55,6 @@
 .bg-few-light {
   background-color: var(--background-few);
 }
-.bg-full-marker {
-  background-color: var(--status-full-marker);
-}
-.bg-location {
-  background-color: var(--location-primary);
-}
-.bg-selected {
-  background-color: var(--background-selected);
-}
 
 // border
 .line-primary {
@@ -78,21 +63,12 @@
 .line-control {
   border-color: var(--line-control);
 }
-.line-food {
-  border-color: var(--line-food);
-}
 .line-parking {
   border-color: var(--line-parking);
 }
 .line-selected {
   border-color: var(--line-selected);
 }
-.line-food-marker {
-  border-color: var(--line-food-marker);
-}
 .line-inverse {
   border-color: var(--line-inverse);
-}
-.line-white {
-  border-color: var(--line-white);
 }

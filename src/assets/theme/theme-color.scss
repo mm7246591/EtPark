@@ -11,7 +11,6 @@
   --text-secondary: #586170;
   --text-food-text: #fffdf9;
   --text-food-outline: #a8573a;
-  --text-rating: #7a5a33;
   --text-brand: #284a63;
   --text-few-text: #8a5300;
   --text-white: #ffffff;
@@ -19,30 +18,21 @@
   // Line
   --line-primary: #e1ded6;
   --line-control: #c9c4b8;
-  --line-food: #a8573a;
   --line-parking: #284a63;
   --line-selected: #284a63;
-  --line-food-marker: #a8573a;
   --line-inverse: #fbfaf7;
-  --line-white: #ffffff;
   --line-focus: #284a63;
 
   // Background
   --background-primary: #f2f0ea;
   --background-card: #fbfaf7;
   --background-input: #ffffff;
-  --background-food-active: #f3e3da;
   --background-available: #e1e8ee;
   --background-few: #f5e8d2; // 剩餘車位少的標籤底色
-  --background-selected: rgb(40 74 99 / 12%);
 
   // Status
   --status-full: #a3392f;
   --status-few: #d39a2e;
-  --status-full-marker: #7a7a78;
-
-  // Location
-  --location-primary: #2f80ed;
 
   // Mask
   --mask-dialog: rgb(28 37 48 / 40%);
@@ -50,7 +40,6 @@
   // Shadow
   --shadow-soft: rgb(28 37 48 / 6%);
   --shadow-medium: rgb(28 37 48 / 12%);
-  --shadow-location: #2f80ed;
 }
 
 // 藍染・夜間：手機或電腦切到深色模式時自動套用。
@@ -68,17 +57,14 @@
     --text-secondary: #a4adb9;
     --text-food-text: #1a1410;
     --text-food-outline: #d98a68;
-    --text-rating: #c9a77a;
     --text-brand: #7ea7c8;
     --text-few-text: #e0b060;
 
     // Line
     --line-primary: #2b3440;
     --line-control: #3a4553;
-    --line-food: #d98a68;
     --line-parking: #7ea7c8;
     --line-selected: #7ea7c8;
-    --line-food-marker: #d98a68;
     --line-inverse: #1a2129;
     --line-focus: #b9d2e6;
 
@@ -86,9 +72,7 @@
     --background-primary: #11161c;
     --background-card: #1a2129;
     --background-input: #232b35;
-    --background-food-active: #3a281f;
     --background-available: #23303d;
-    --background-selected: rgb(126 167 200 / 16%);
     --background-few: #33291a;
 
     // Status
