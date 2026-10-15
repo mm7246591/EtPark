@@ -77,5 +77,3 @@ EtPark/
 ├── package.json                      # 套件與指令
 └── README.md
 ```
-
-頁面元件放在 `src/views`，子元件放在 `src/components`；頁面專屬的邏輯、型別及常數與頁面共置，共用邏輯則放在 `src` 對應目錄。
