@@ -60,7 +60,7 @@ const ignoreEnter = (event: KeyboardEvent) => {
     class="bg-card relative z-[30] mx-[12px] mt-[12px] grid grid-cols-[auto_minmax(0,1fr)] items-start gap-x-[6px] rounded-[26px] py-[4px] pl-[16px] pr-[4px] shadow-[0_6px_20px_var(--shadow-medium)] [grid-area:search] has-[input:focus-visible]:outline has-[input:focus-visible]:outline-[2px] has-[input:focus-visible]:outline-offset-[2px] has-[input:focus-visible]:outline-[color:var(--line-focus)] md:mx-[16px] md:mt-[16px] md:block md:rounded-[24px] md:rounded-b-[0px] md:px-[20px] md:pb-[12px] md:pt-[20px] md:shadow-none md:has-[input:focus-visible]:outline-none"
   >
     <h1
-      class="text-brand mr-[4px] text-[16px]/[44px] font-[500] md:mb-[12px] md:mr-[0px] md:text-[20px]/[30px]"
+      class="text-brand mr-[4px] flex h-[44px] items-center text-[16px] font-[500] md:mb-[12px] md:mr-[0px] md:block md:h-auto md:text-[20px]/[30px]"
     >
       EtPark
     </h1>
@@ -86,7 +86,7 @@ const ignoreEnter = (event: KeyboardEvent) => {
         <ComboboxInput
           id="destination-query"
           v-model="query"
-          class="min-w-[0px] flex-1 bg-transparent py-[8px] text-[16px] focus-visible:outline-none"
+          class="h-[44px] min-w-[0px] flex-1 bg-transparent text-[16px] focus-visible:outline-none"
           placeholder="輸入店名或地址"
           :disabled="blocked || loading || !mapsConfigured"
           @update:model-value="updateQuery"
@@ -178,6 +178,7 @@ const ignoreEnter = (event: KeyboardEvent) => {
 - 查詢中、配額封鎖或未設定 key 時停用輸入與搜尋；未設定 key 時顯示設定提示。
 - 搜尋框聚焦時，手機以整顆膠囊、桌面以搜尋框外框顯示 focus outline，輸入框本身不另畫外框。
 - 搜尋按鈕為 44px 圓形放大鏡圖示，保留 aria-label 與 title。
+- 手機品牌名稱以固定 44px 高度置中，不靠行高：Android 系統字級放大（含 LINE 內建瀏覽器）會連同 px 行高一起放大，靠行高會撐高膠囊、與搜尋按鈕上下錯位。
 - 輸入框字級 16px：iOS（含 LINE 內建瀏覽器）聚焦小於 16px 的輸入框會自動放大頁面，造成版面左右位移。
 - 字體沿用全站 Noto Sans TC。
 - 尺寸與效果使用 tag 上明確數值 Tailwind class；顏色使用 variables.scss 的普通 class，色值集中 theme-color.scss。
