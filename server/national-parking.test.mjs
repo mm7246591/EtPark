@@ -36,6 +36,11 @@ it('TDX 只配對小客車位，過期及未營業顯示未知', () => {
   expect(
     normalizeTDX(desc, [{ ...live, ServiceStatus: 0 }])[0]?.spaces
   ).toBeNull();
+  // LiveOccuppancyAvailable 常未更新，有即時資料就顯示。
+  expect(
+    normalizeTDX([{ ...desc[0], LiveOccuppancyAvailable: 0 }], [live])[0]
+      ?.spaces
+  ).toBe(0);
 });
 it('缺 TDX key 時回傳設定提示，不冒充查無停車場', async () => {
   const result = await getCityParking('Taichung', {});

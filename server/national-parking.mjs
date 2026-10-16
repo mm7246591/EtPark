@@ -218,10 +218,9 @@ const normalizeTDX = (description, available) => {
         location,
         distance: 0,
         price: item.FareDescription || '依現場公告',
+        // 基本資料的 LiveOccuppancyAvailable 常未更新（桃園 125 場有即時資料只標 4 場），以即時資料本身判斷。
         spaces:
-          fresh &&
-          live?.ServiceStatus === 1 &&
-          item.LiveOccuppancyAvailable === 1
+          fresh && live?.ServiceStatus === 1
             ? validSpaces(car?.AvailableSpaces)
             : null,
       },
