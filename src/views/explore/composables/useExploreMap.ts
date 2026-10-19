@@ -1,3 +1,4 @@
+import { assertApiRequestAllowed } from '@/utils/apiRateLimit';
 import { useApiUsage } from '@/composables/useApiUsage';
 import { onMounted, onBeforeUnmount, shallowRef, watch } from 'vue';
 import type { Ref } from 'vue';
@@ -92,6 +93,7 @@ export const useExploreMap = (
       if (disposed || !host.value) return;
       if (blocked.value) return;
       markerLibrary = marker;
+      assertApiRequestAllowed();
       map = new maps.Map(host.value, {
         center: { lat: 25.0478, lng: 121.517 },
         zoom: 15,

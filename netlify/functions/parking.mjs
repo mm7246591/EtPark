@@ -21,4 +21,15 @@ const handler = async (request) => {
   return new Response(body, { status, headers });
 };
 
+const config = {
+  path: '/api/parking/city',
+  rateLimit: {
+    action: 'rate_limit',
+    windowLimit: 5,
+    windowSize: 1,
+    aggregateBy: ['ip', 'domain'],
+  },
+};
+
+export { config };
 export default handler;

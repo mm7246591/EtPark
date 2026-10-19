@@ -14,6 +14,7 @@ vi.mock('vue', async (importOriginal) => ({
 }));
 beforeEach(() => {
   vi.clearAllMocks();
+  mocks.rateLimit.mockReset();
   mocks.minutes.mockResolvedValue([]);
 });
 afterEach(() => {
@@ -28,6 +29,10 @@ const mocks = vi.hoisted(() => ({
   parking: vi.fn(),
   quotaError: vi.fn(),
   minutes: vi.fn(),
+  rateLimit: vi.fn(),
+}));
+vi.mock('../../../utils/apiRateLimit', () => ({
+  assertApiRequestAllowed: () => mocks.rateLimit(),
 }));
 vi.mock('../../../apis/googleMaps', () => ({
   mapsConfigured: true,
@@ -499,4 +504,19 @@ it('附近沒有停車資料時最多擴大到三公里，不重試 API 或產�
   expect(explore.parkingLots.value).toEqual([]);
   expect(mocks.parking).toHaveBeenCalledTimes(1);
   expect(mocks.minutes).not.toHaveBeenCalled();
+});
+
+it('搜尋超過短時間限制時不送 Google 請求，交給既有 dialog 處理且可稍候重試', async () => {
+  const explore = useExplore();
+  const error = new Error('API_RATE_LIMITED');
+  mocks.rateLimit.mockImplementationOnce(() => {
+    throw error;
+  });
+  await explore.search('店家');
+  expect(mocks.search).not.toHaveBeenCalled();
+  expect(mocks.quotaError).toHaveBeenCalledWith(error);
+  expect(explore.searching.value).toBe(false);
+  mocks.search.mockResolvedValueOnce({ suggestions: [] });
+  await explore.search('店家');
+  expect(mocks.search).toHaveBeenCalledTimes(1);
 });

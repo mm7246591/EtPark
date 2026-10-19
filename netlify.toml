@@ -7,12 +7,6 @@
   node_bundler = "esbuild"
 
 [[redirects]]
-  from = "/api/parking/city"
-  to = "/.netlify/functions/parking"
-  status = 200
-  force = true
-
-[[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200

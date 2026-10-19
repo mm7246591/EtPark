@@ -1,3 +1,4 @@
+import { assertApiRequestAllowed } from '@/utils/apiRateLimit';
 import { useApiUsage } from '@/composables/useApiUsage';
 import { computed, shallowRef, onBeforeUnmount } from 'vue';
 import { getCityParking } from '@/apis/nationalParking';
@@ -208,6 +209,7 @@ export const useExplore = () => {
       if (request !== sequence) return;
       if (blocked.value) return;
       token ??= new AutocompleteSessionToken();
+      assertApiRequestAllowed();
       const result = await AutocompleteSuggestion.fetchAutocompleteSuggestions({
         input: searchQuery,
         sessionToken: token,
@@ -277,6 +279,7 @@ export const useExplore = () => {
       const place = suggestion.prediction.toPlace();
       token = undefined;
       // Essentials only: 不取 Pro 的 displayName 或 Enterprise 的 rating。
+      assertApiRequestAllowed();
       await place.fetchFields({
         fields: ['location', 'formattedAddress', 'attributions'],
       });

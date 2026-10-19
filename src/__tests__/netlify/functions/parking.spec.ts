@@ -1,5 +1,5 @@
 import { beforeEach, expect, it, vi } from 'vitest';
-import handler from '../../../../netlify/functions/parking.mjs';
+import handler, { config } from '../../../../netlify/functions/parking.mjs';
 
 const parking = vi.hoisted(() => vi.fn());
 vi.mock('../../../../server/national-parking.mjs', () => ({
@@ -38,4 +38,16 @@ it('來源的 429 不變成 200，保留前端配額提示行為', async () => {
     new Request('https://etpark.netlify.app/api/parking/city?city=Taipei')
   );
   expect(result.status).toBe(429);
+});
+
+it('正式 API 自訂路徑使用每網域每 IP 五次每秒的 Netlify 邊緣限流', () => {
+  expect(config).toEqual({
+    path: '/api/parking/city',
+    rateLimit: {
+      action: 'rate_limit',
+      windowLimit: 5,
+      windowSize: 1,
+      aggregateBy: ['ip', 'domain'],
+    },
+  });
 });
