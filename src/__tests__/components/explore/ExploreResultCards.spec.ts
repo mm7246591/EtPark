@@ -53,7 +53,7 @@ it('停車場卡片顯示車位、距離分鐘、計費方式，選取後才展�
   expect(selected).toContain('記錄車位');
 });
 
-it('未定位或沒有時間時不顯示時間與未提供提示', async () => {
+it('沒有時間時不顯示分鐘與未提供提示', async () => {
   const html = await render({
     places: props.places.map((place) => ({ ...place, drivingMinutes: null })),
   });

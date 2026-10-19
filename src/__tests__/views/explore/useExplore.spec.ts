@@ -274,41 +274,47 @@ it('定位後搜尋候選只取得店名地址，不查行車時間或詳細資�
   expect(mocks.fields).not.toHaveBeenCalled();
 });
 
-it('停車時間從目前位置計算，失敗仍保留已取得的車位資訊', async () => {
-  const explore = useExplore();
-  explore.origin.value = { lat: 25.03, lng: 121.56 };
-  const location = { lat: 25.04, lng: 121.56 };
-  const lotLocation = { lat: 25.0401, lng: 121.56 };
-  mocks.parking.mockResolvedValue({
-    lots: [{ id: 'parking', spaces: 10, location: lotLocation }],
-    source: '市府',
-    notice: '',
-  });
-  mocks.minutes.mockResolvedValueOnce([3]);
-  const suggestion = {
-    name: '店家',
-    prediction: {
-      toPlace: () => ({
-        id: 'store',
-        fetchFields: mocks.fields,
-        formattedAddress: '台北市',
-        location: { toJSON: () => location },
-      }),
-    },
-  };
-  await explore.chooseSuggestion(suggestion as never);
-  expect(mocks.minutes).toHaveBeenCalledWith(explore.origin.value, [
-    lotLocation,
-  ]);
-  expect(explore.parkingLots.value[0]?.drivingMinutes).toBe(3);
-  explore.origin.value = { lat: 25.02, lng: 121.56 };
-  const error = new Error('network failed');
-  mocks.minutes.mockRejectedValueOnce(error);
-  await explore.chooseSuggestion(suggestion as never);
-  expect(explore.source.value).toBe('市府');
-  expect(explore.parkingLots.value[0]?.spaces).toBe(10);
-  expect(mocks.quotaError).toHaveBeenCalledWith(error);
-});
+it.each([null, { lat: 25.03, lng: 121.56 }])(
+  '停車時間由目的地計算，目前位置 %j 不影響查詢，失敗保留車位',
+  async (currentLocation) => {
+    const explore = useExplore();
+    explore.origin.value = currentLocation;
+    const location = { lat: 25.04, lng: 121.56 };
+    const lotLocation = { lat: 25.0401, lng: 121.56 };
+    mocks.parking.mockResolvedValue({
+      lots: [{ id: 'parking', spaces: 10, location: lotLocation }],
+      source: '市府',
+      notice: '',
+    });
+    mocks.minutes.mockResolvedValueOnce([3]);
+    const suggestion = {
+      name: '店家',
+      prediction: {
+        toPlace: () => ({
+          id: 'store',
+          fetchFields: mocks.fields,
+          formattedAddress: '台北市',
+          location: { toJSON: () => location },
+        }),
+      },
+    };
+    await explore.chooseSuggestion(suggestion as never);
+    expect(mocks.minutes).toHaveBeenCalledWith(location, [lotLocation]);
+    expect(explore.parkingLots.value[0]?.drivingMinutes).toBe(3);
+    explore.origin.value = { lat: 25.02, lng: 121.56 };
+    explore.refresh();
+    await vi.waitFor(() => expect(explore.loading.value).toBe(false));
+    expect(mocks.minutes).toHaveBeenCalledTimes(1);
+    expect(explore.parkingLots.value[0]?.drivingMinutes).toBe(3);
+    location.lat += 0.0001;
+    const error = new Error('network failed');
+    mocks.minutes.mockRejectedValueOnce(error);
+    await explore.chooseSuggestion(suggestion as never);
+    expect(explore.source.value).toBe('市府');
+    expect(explore.parkingLots.value[0]?.spaces).toBe(10);
+    expect(mocks.quotaError).toHaveBeenCalledWith(error);
+  }
+);
 
 it('一公里有確定空位時不擴大，排序不再查 API', async () => {
   const explore = useExplore();
@@ -335,10 +341,14 @@ it('一公里有確定空位時不擴大，排序不再查 API', async () => {
   } as never);
   expect(explore.parkingLots.value.map((lot) => lot.id)).toEqual(['near']);
   expect(explore.radius.value).toBe(1000);
+  expect(mocks.minutes).toHaveBeenCalledTimes(1);
+  expect(mocks.minutes).toHaveBeenCalledWith(center, [
+    { lat: 25.031, lng: 121.56 },
+  ]);
   explore.parkingSort.value = ['spaces'];
   expect(explore.parkingLots.value.map((lot) => lot.id)).toEqual(['near']);
   expect(mocks.parking).toHaveBeenCalledTimes(1);
-  expect(mocks.minutes).not.toHaveBeenCalled();
+  expect(mocks.minutes).toHaveBeenCalledTimes(1);
 });
 
 it('重開收藏停車場取得新車位，不把收藏資料當成即時狀態', async () => {

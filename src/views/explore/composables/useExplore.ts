@@ -71,7 +71,8 @@ export const useExplore = () => {
   let token: google.maps.places.AutocompleteSessionToken | undefined;
   let timeSequence = 0;
   const loadTimes = async () => {
-    if (!origin.value || blocked.value || disposed || !mapsConfigured) return;
+    const routeOrigin = destination.value?.location;
+    if (!routeOrigin || blocked.value || disposed || !mapsConfigured) return;
     const request = ++timeSequence;
     const destinationRequest = sequence;
     const lots = allParkingLots.value.filter(
@@ -83,7 +84,7 @@ export const useExplore = () => {
       !disposed &&
       !blocked.value;
     const minutes = await getMinutes(
-      origin.value,
+      routeOrigin,
       lots.map((lot) => lot.location),
       isCurrent
     );
