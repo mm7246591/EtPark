@@ -47,6 +47,11 @@ const updateQuery = (value: string) => {
   query.value = value;
   input();
 };
+// 同一關鍵字已有結果時頁面不重查，先展開候選，按 Escape 收起後再按搜尋仍看得到。
+const submit = () => {
+  showSuggestions.value = true;
+  emit('search', query.value);
+};
 const ignoreEnter = (event: KeyboardEvent) => {
   if (event.isComposing || composing.value) return;
   event.preventDefault();
@@ -100,7 +105,7 @@ const ignoreEnter = (event: KeyboardEvent) => {
           title="搜尋"
           class="bg-brand-primary text-inverse flex h-[44px] w-[44px] shrink-0 items-center justify-center rounded-[9999px] hover:bg-[color:var(--brand-tertiary)] disabled:opacity-[0.4] disabled:hover:bg-[color:var(--brand-primary)]"
           :disabled="blocked || loading || !mapsConfigured || !query.trim()"
-          @click="emit('search', query)"
+          @click="submit"
         >
           <span
             aria-hidden="true"
@@ -168,7 +173,7 @@ const ignoreEnter = (event: KeyboardEvent) => {
 ## 主要行為
 
 - 使用者直接輸入店名或地址，縣市由頁面流程自動判斷，不提供手動縣市選單。
-- 中文組字完成後發出 inputSearch，由頁面延遲 400ms 查建議；點擊搜尋按鈕可立即搜尋；搜尋框 Enter 僅確認組字，不搜尋或選店。
+- 中文組字完成後發出 inputSearch，由頁面延遲 400ms 查建議；點擊搜尋按鈕可立即搜尋，同一關鍵字查詢中或已有結果時不重送請求，只重新展開候選；搜尋框 Enter 僅確認組字，不搜尋或選店。
 - 建議只呈現名稱與地址，不顯示距離或時間，也不查詢候選的行車時間；方向鍵移動候選高亮，點擊店家選取，Escape 關閉。
 - 候選以浮動清單蓋在地圖上，不推擠版面；手機與整顆膠囊同寬，桌面與搜尋框同寬。
 - 搜尋時由頁面自動取得定位；拒絕定位仍能搜尋，選擇建議時發出 chooseSuggestion。

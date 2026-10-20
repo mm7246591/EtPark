@@ -187,6 +187,12 @@ export const useExplore = () => {
       message.value = '請先依 README 設定 Google Maps API key。';
       return;
     }
+    // 同一關鍵字查詢中或已有結果時不重送，避免連點重複計費。
+    if (
+      query.trim() === searchQuery &&
+      (searching.value || suggestions.value.length)
+    )
+      return;
     clearTimeout(searchTimer);
     searchQuery = query.trim();
     if (searchQuery.length < 2) {

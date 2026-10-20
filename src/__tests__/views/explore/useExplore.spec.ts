@@ -202,6 +202,21 @@ it('搜尋與店家詳情的 SDK 配額錯誤交給共用 dialog 處理', async 
   expect(mocks.parking).not.toHaveBeenCalled();
 });
 
+it('同一關鍵字連點只查一次，已有結果時不重查，改字才重新查詢', async () => {
+  mocks.search.mockResolvedValue({
+    suggestions: [
+      { placePrediction: { placeId: 'a', text: { toString: () => '店家' } } },
+    ],
+  });
+  const explore = useExplore();
+  await Promise.all([explore.search('店家'), explore.search('店家 ')]);
+  expect(mocks.search).toHaveBeenCalledTimes(1);
+  await explore.search('店家');
+  expect(mocks.search).toHaveBeenCalledTimes(1);
+  await explore.search('咖啡');
+  expect(mocks.search).toHaveBeenCalledTimes(2);
+});
+
 it('首次搜尋自動請求定位，拒絕後仍搜尋且不重複請求定位', async () => {
   const geolocation = vi.fn((_success, failure) => failure({ code: 1 }));
   vi.stubGlobal('navigator', {
