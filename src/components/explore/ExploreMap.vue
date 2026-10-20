@@ -39,8 +39,8 @@ const { markers, mapError, ready, tilesLoaded } = useExploreMap(
 <template>
   <section
     aria-label="目的地與附近停車場地圖"
-    @pointerdown.capture="notePress"
     class="bg-primary relative min-h-[0px] min-w-[0px] overflow-hidden [grid-area:1/1/4/2] md:[grid-area:1/1/-1/-1]"
+    @pointerdown.capture="notePress"
   >
     <div
       ref="host"
