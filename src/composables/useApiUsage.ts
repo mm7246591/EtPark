@@ -32,8 +32,8 @@ const handleApiError = (error: unknown) => {
     stop('今日免費查詢額度已達上限，請明日再試！');
     return true;
   }
-  // 本分頁或停車 API 的短時間限流可以重試，不視為每日配額耗盡。
-  if (message === 'API_RATE_LIMITED' || message === 'HTTP 429') {
+  // 停車 API 的 Netlify 短時間限流可以重試，不視為每日配額耗盡。
+  if (message === 'HTTP 429') {
     dialogMessage.value = '操作過於頻繁，請稍後再試';
     dialogOpen.value = true;
     return false;

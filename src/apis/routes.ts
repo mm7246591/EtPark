@@ -1,4 +1,3 @@
-import { assertApiRequestAllowed } from '@/utils/apiRateLimit';
 import { loadMapsLibrary } from './googleMaps';
 import type { DrivingDestination } from './types/routes';
 
@@ -8,7 +7,6 @@ export const getDrivingMinutes = async (
 ): Promise<(number | null)[]> => {
   if (!destinations.length) return [];
   const { RouteMatrix } = await loadMapsLibrary('routes');
-  assertApiRequestAllowed();
   const { matrix } = await RouteMatrix.computeRouteMatrix({
     origins: [origin],
     destinations,

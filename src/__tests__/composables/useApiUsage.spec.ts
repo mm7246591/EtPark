@@ -44,16 +44,13 @@ it.each([
   );
 });
 
-it.each(['HTTP 429', 'API_RATE_LIMITED'])(
-  '短時間限流 %s 顯示指定文案，不封鎖後續查詢',
-  (message) => {
-    const usage = useApiUsage();
-    expect(usage.handleApiError(new Error(message))).toBe(false);
-    expect(usage.blocked.value).toBe(false);
-    expect(usage.dialogOpen.value).toBe(true);
-    expect(usage.dialogMessage.value).toBe('操作過於頻繁，請稍後再試');
-  }
-);
+it('停車 API 回 429 顯示指定文案，不封鎖後續查詢', () => {
+  const usage = useApiUsage();
+  expect(usage.handleApiError(new Error('HTTP 429'))).toBe(false);
+  expect(usage.blocked.value).toBe(false);
+  expect(usage.dialogOpen.value).toBe(true);
+  expect(usage.dialogMessage.value).toBe('操作過於頻繁，請稍後再試');
+});
 
 it.each([
   new TypeError('Failed to fetch'),
