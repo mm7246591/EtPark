@@ -90,7 +90,7 @@ const setExpanded = async (value: boolean) => {
   await nextTick();
   animation.cancel();
 };
-// 父頁面在個人選單展開或點地圖空白處時呼叫，收合下方清單。
+// 父頁面在個人選單展開時呼叫，收合下方清單。
 defineExpose({ collapse: () => setExpanded(false) });
 // 選取改變（含點地圖標記）時展開抽屜，並把對應卡片（含展開的操作列）捲進清單的可見範圍；切換分頁不改變開合。
 watch(
@@ -375,14 +375,14 @@ watch(
 - Props：noticeMessage、parkingNotice、activeKind、selected（可為 null）、loading、blocked、places、foodCount、favoriteKeys、radius、expanding。
 - v-model：無；分頁值由父頁面的 Reka TabsRoot 管理，須放在 TabsRoot 內。
 - Emits：select、navigate、favorite、recordParking。
-- Expose：collapse()，收合手機抽屜（尚未選擇目的地時不動作），供父頁面在個人選單展開或點地圖空白處時呼叫。
+- Expose：collapse()，收合手機抽屜（尚未選擇目的地時不動作），供父頁面在個人選單展開時呼叫。
 - Slots：parking-controls，由父頁面在停車場分頁放入排序，位於搜尋範圍文字右側。
 - 主要依賴：views/explore/types/place、views/explore/utils/parkingFee、Vue、Reka UI Tabs／Toggle、Google Material Symbols Rounded、Tailwind CSS v3。
 
 ## 主要行為
 
 - 手機點擊頂部把手開合抽屜，展開時顯示清單；收合時停車場分頁只留分頁與「搜尋範圍 · 排序」列，目的地分頁改顯示目的地名稱與地址列，兩者同高，讓出地圖空間。
-- 尚未選擇目的地時把手停用、點擊無反應，維持顯示搜尋提示；搜尋或選取改變（含點地圖標記）時自動展開；點地圖空白處或展開個人選單時收合；切換分頁維持原本的開合狀態。
+- 尚未選擇目的地時把手停用、點擊無反應，維持顯示搜尋提示；搜尋或選取改變（含點地圖標記）時自動展開；展開個人選單時收合；點地圖空白處或切換分頁維持原本的開合狀態。
 - 分頁為兩欄分段控制，支援方向鍵、Home 與 End；切換結果由父頁面 TabsRoot 回報。
 - 停車場分頁在分頁下方顯示「搜尋範圍 N 公里 · M 處」與排序，固定一行；自動擴大範圍時改為「正在調整搜尋範圍…」。
 - 清單最上方、第一張卡片前以小字提醒「實際費率以現場公告為準」，沒有結果時不顯示；不放在搜尋範圍列，避免小螢幕換行使收合高度不一致。
